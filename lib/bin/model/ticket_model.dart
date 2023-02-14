@@ -153,3 +153,46 @@ class Movimentacao {
         "datamovimento": datamovimento.toIso8601String(),
       };
 }
+
+
+
+/*
+
+[
+    {
+        "codigo" : "",
+        "uid" : "",
+        "assunto" : "",
+        "conteudo" : "",
+        "usuarioabertura" :"",
+        "responsavel" :"",
+        "responsavelatual" :"",
+        "abertura" : "2022-01-01 10:30:00",
+        "encerrado" :"2022-01-01 18:30:00",
+        "ultimamovimentacao" :"2022-01-01 18:30:00",
+        "setorinicial" : "",
+        "setoratual" : "",
+        "tipo" : "",
+        "urgencia" : "",
+        "status" : "",
+        "mensagem" : 
+        [
+           {
+               "datamensagem" : "2022-01-01 10:30:00",
+               "usuario" : "",
+               "uid" : "",
+               "conteudo" : ""
+            }
+        ],
+        "movimentacao" : 
+        [
+            {
+                "uid" : "" ,
+                "usuarioenvio" : "",
+                "usuariodefinido" : "",
+                "datamovimento" : "2022-01-01 10:30:00"
+            }
+        ]
+    }
+]
+*/

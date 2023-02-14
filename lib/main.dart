@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: getIt<ProjectInfo>().nome,
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         Locale('pt', 'BR'),
       ],
       theme: FlexThemeData.light(
-        scheme: FlexScheme.blue,
+        scheme: FlexScheme.deepBlue,
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
         blendLevel: 9,
         subThemesData: const FlexSubThemesData(
@@ -45,20 +45,20 @@ class MyApp extends StatelessWidget {
           blendOnColors: false,
         ),
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
-        useMaterial3: true,
+        useMaterial3: false,
         swapLegacyOnMaterial3: true,
         // To use the playground font, add GoogleFonts package and uncomment
         fontFamily: GoogleFonts.notoSans().fontFamily,
       ),
       darkTheme: FlexThemeData.dark(
-        scheme: FlexScheme.blue,
+        scheme: FlexScheme.deepBlue,
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
         blendLevel: 15,
         subThemesData: const FlexSubThemesData(
           blendOnLevel: 20,
         ),
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
-        useMaterial3: true,
+        useMaterial3: false,
         swapLegacyOnMaterial3: true,
         // To use the Playground font, add GoogleFonts package and uncomment
         fontFamily: GoogleFonts.notoSans().fontFamily,

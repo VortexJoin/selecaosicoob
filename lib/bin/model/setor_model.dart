@@ -15,24 +15,26 @@ String setorToJson(List<Setor> data) =>
 
 class Setor {
   Setor({
-    this.codigoSetor = '',
-    this.uidSetor = '',
+    this.codigo = '',
+    this.uid = '',
     required this.descricao,
+    this.checkBox = false,
   });
 
-  String codigoSetor;
-  String uidSetor;
+  String codigo;
+  String uid;
   String descricao;
+  bool checkBox;
 
   factory Setor.fromJson(Map<String, dynamic> json) => Setor(
-        codigoSetor: json["codigoSetor"],
-        uidSetor: json["uidSetor"],
+        codigo: json["codigoSetor"],
+        uid: json["uidSetor"],
         descricao: json["descricao"],
       );
 
   Map<String, dynamic> toJson() => {
-        "codigoSetor": codigoSetor,
-        "uidSetor": uidSetor,
+        "codigoSetor": codigo,
+        "uidSetor": uid,
         "descricao": descricao,
       };
 }
@@ -40,6 +42,7 @@ class Setor {
 class SetorController extends ChangeNotifier {
   bool _isLoading = false;
   String _hasError = '';
+  String _orderField = 'descricao';
   final Uuid _uuid = const Uuid();
   List<Setor> _listaSetor = [];
 
@@ -47,8 +50,14 @@ class SetorController extends ChangeNotifier {
 
   SetorController({bool loadSetores = false}) {
     if (loadSetores) {
-      getSetores();
+      getData();
     }
+  }
+
+  setOrderField(String orderField) {
+    _orderField = orderField;
+    getData();
+    notifyListeners();
   }
 
   bool get isLoading => _isLoading;
@@ -67,7 +76,7 @@ class SetorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getSetores({String filtroDescricao = ''}) async {
+  Future<void> getData({String filtroDescricao = ''}) async {
     _setLoading();
     try {
       _listaSetor = [];
@@ -75,6 +84,8 @@ class SetorController extends ChangeNotifier {
         await firestoreService
             .getCollection()
             .where("descricao", arrayContains: filtroDescricao.toLowerCase())
+            .orderBy("descricao")
+            .orderBy(_orderField)
             .get()
             .then((snapshot) {
           _listaSetor = snapshot.docs
@@ -82,8 +93,12 @@ class SetorController extends ChangeNotifier {
               .toList();
         });
       } else {
-        await firestoreService.getItems().then((snapshot) {
-          _listaSetor = snapshot
+        await firestoreService
+            .getCollection()
+            .orderBy(_orderField)
+            .get()
+            .then((snapshot) {
+          _listaSetor = snapshot.docs
               .map((e) => Setor.fromJson(e.data() as Map<String, dynamic>))
               .toList();
         });
@@ -102,17 +117,17 @@ class SetorController extends ChangeNotifier {
     // ESSE METODO SERVE TANTO PARA INSERIR QUANTO PARA EDITAR
     _setLoading();
 
-    if (setor.uidSetor.isEmpty) {
-      setor.uidSetor = _uuid.v4();
+    if (setor.uid.isEmpty) {
+      setor.uid = _uuid.v4();
     }
 
-    if (setor.codigoSetor.isEmpty) {
-      setor.codigoSetor = setor.uidSetor.split('-').first;
+    if (setor.codigo.isEmpty) {
+      setor.codigo = setor.uid.split('-').first;
     }
     try {
       await firestoreService.setdata(
         item: setor.toJson(),
-        id: setor.codigoSetor,
+        id: setor.codigo,
       );
       _setError('');
       _setLoading();
@@ -124,10 +139,12 @@ class SetorController extends ChangeNotifier {
     }
   }
 
-  Future<Setor?> getSetor(String codigoSetor) async {
+  Future<Setor?> getByCodigo(String codigo) async {
     final docSnapshot = await firestoreService
         .getCollection()
-        .where("codigoSetor", isEqualTo: codigoSetor)
+        .where("codigo", isEqualTo: codigo)
+        .orderBy("codigo")
+        .orderBy(_orderField)
         .get();
     if (docSnapshot.docs.isNotEmpty) {
       return Setor.fromJson(

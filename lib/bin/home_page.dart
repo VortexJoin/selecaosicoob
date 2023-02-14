@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:selecaosicoob/bin/pages/setor/view_list_setor_page.dart';
+import 'package:selecaosicoob/bin/pages/usuario/usuario_list_page.dart';
 
 import 'model/project_info_model.dart';
 
@@ -37,7 +38,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const ViewListSetor()),
+                    builder: (context) => const ViewListSetor(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: const Text('Usuarios'),
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ViewListUsuario(),
+                  ),
                 );
               },
             ),

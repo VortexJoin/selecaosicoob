@@ -16,8 +16,9 @@ class SetorPageController extends ChangeNotifier {
   }) async {
     bool hasSetor = setor == null ? false : true;
 
-    TextEditingController setorDescricaoController =
-        TextEditingController(text: hasSetor ? setor.descricao : '');
+    TextEditingController setorDescricaoController = TextEditingController(
+      text: hasSetor ? setor.descricao : '',
+    );
 
     await showDialog<void>(
       context: context,
@@ -49,7 +50,6 @@ class SetorPageController extends ChangeNotifier {
               child: const Text('Salvar'),
               onPressed: () async {
                 if (hasSetor) {
-                  // COPIA ID E UUID
                   setor.descricao = setorDescricaoController.text;
                   await setorController
                       .setdata(setor)
@@ -66,11 +66,17 @@ class SetorPageController extends ChangeNotifier {
       },
     );
 
-    Future.delayed(const Duration(milliseconds: 500)).then((value) => search());
+    Future.delayed(const Duration(milliseconds: 500))
+        .then((value) => initialData());
+  }
+
+  void initialData() {
+    setorController.getData();
+    notifyListeners();
   }
 
   void search() {
-    setorController.getSetores(filtroDescricao: searchQuery);
+    setorController.getData(filtroDescricao: searchQuery);
     isSearching = true;
     notifyListeners();
   }
