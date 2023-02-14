@@ -28,4 +28,8 @@ class FirestoreService {
   Future<void> deleteItem(String id) async {
     await _collection.doc(id).delete();
   }
+
+  CollectionReference getCollection() {
+    return _collection;
+  }
 }

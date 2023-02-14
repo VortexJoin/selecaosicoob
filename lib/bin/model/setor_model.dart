@@ -43,6 +43,8 @@ class SetorController extends ChangeNotifier {
   final Uuid _uuid = const Uuid();
   List<Setor> _listaSetor = [];
 
+  FirestoreService firestoreService = FirestoreService('setor');
+
   SetorController({bool loadSetores = false}) {
     if (loadSetores) {
       getSetores();
@@ -60,24 +62,45 @@ class SetorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getSetores() async {
+  _setError(String error) {
+    _hasError = error;
+    notifyListeners();
+  }
+
+  Future<void> getSetores({String filtroDescricao = ''}) async {
     _setLoading();
-    FirestoreService firestoreService = FirestoreService('setor');
-    _listaSetor = [];
-    await firestoreService.getItems().then((snapshot) {
-      _listaSetor = snapshot
-          .map((e) => Setor.fromJson(e.data() as Map<String, dynamic>))
-          .toList();
-    });
+    try {
+      _listaSetor = [];
+      if (filtroDescricao.isNotEmpty) {
+        await firestoreService
+            .getCollection()
+            .where("descricao", arrayContains: filtroDescricao.toLowerCase())
+            .get()
+            .then((snapshot) {
+          _listaSetor = snapshot.docs
+              .map((e) => Setor.fromJson(e.data() as Map<String, dynamic>))
+              .toList();
+        });
+      } else {
+        await firestoreService.getItems().then((snapshot) {
+          _listaSetor = snapshot
+              .map((e) => Setor.fromJson(e.data() as Map<String, dynamic>))
+              .toList();
+        });
+      }
+
+      _setError('');
+    } catch (e) {
+      _setError(e.toString());
+    }
 
     notifyListeners();
     _setLoading();
   }
 
-  Future<void> setdata(Setor setor) async {
+  Future<bool> setdata(Setor setor) async {
     // ESSE METODO SERVE TANTO PARA INSERIR QUANTO PARA EDITAR
     _setLoading();
-    FirestoreService firestoreService = FirestoreService('setor');
 
     if (setor.uidSetor.isEmpty) {
       setor.uidSetor = _uuid.v4();
@@ -86,11 +109,30 @@ class SetorController extends ChangeNotifier {
     if (setor.codigoSetor.isEmpty) {
       setor.codigoSetor = setor.uidSetor.split('-').first;
     }
+    try {
+      await firestoreService.setdata(
+        item: setor.toJson(),
+        id: setor.codigoSetor,
+      );
+      _setError('');
+      _setLoading();
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading();
+      return false;
+    }
+  }
 
-    await firestoreService.setdata(
-      item: setor.toJson(),
-      id: setor.codigoSetor,
-    );
-    _setLoading();
+  Future<Setor?> getSetor(String codigoSetor) async {
+    final docSnapshot = await firestoreService
+        .getCollection()
+        .where("codigoSetor", isEqualTo: codigoSetor)
+        .get();
+    if (docSnapshot.docs.isNotEmpty) {
+      return Setor.fromJson(
+          docSnapshot.docs.first.data as Map<String, dynamic>);
+    }
+    return null;
   }
 }
