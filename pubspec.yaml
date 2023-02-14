@@ -43,6 +43,10 @@ dependencies:
   google_fonts: ^4.0.3
   flutter_localizations:
     sdk: flutter
+  cloud_firestore: ^4.3.2
+  get_it: ^7.2.0
+  #easy_sidemenu: ^0.4.1+1
+  #flutter_side_menu: ^0.2.1
 
 dev_dependencies:
   flutter_test:
