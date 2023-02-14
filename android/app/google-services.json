@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "866406826736",
+    "firebase_url": "https://selecaosicoob-default-rtdb.firebaseio.com",
+    "project_id": "selecaosicoob",
+    "storage_bucket": "selecaosicoob.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:866406826736:android:626cb368ccce4b5bd33835",
+        "android_client_info": {
+          "package_name": "com.rjinform.selecaosicoob"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "866406826736-023f7g93c7099he90hi9quokni0b46su.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwRauB-kLdEnh0EQpDkIoJeq-Z67Kqro0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "866406826736-023f7g93c7099he90hi9quokni0b46su.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
