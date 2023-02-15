@@ -304,7 +304,55 @@ class TicketController extends ChangeNotifier {
         .get();
     if (docSnapshot.docs.isNotEmpty) {
       return Ticket.fromJson(
-          docSnapshot.docs.first.data as Map<String, dynamic>);
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<Ticket?> getBySetor(String setoratual) async {
+    final docSnapshot = await firestoreService
+        .getCollection()
+        .where("setoratual", isEqualTo: setoratual)
+        .get();
+    if (docSnapshot.docs.isNotEmpty) {
+      return Ticket.fromJson(
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<Ticket?> getByResponsavelAtual(String responsavelatual) async {
+    final docSnapshot = await firestoreService
+        .getCollection()
+        .where("responsavelatual", isEqualTo: responsavelatual)
+        .get();
+    if (docSnapshot.docs.isNotEmpty) {
+      return Ticket.fromJson(
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<Ticket?> getByUsuarioAbertura(String usuarioabertura) async {
+    final docSnapshot = await firestoreService
+        .getCollection()
+        .where("usuarioabertura", isEqualTo: usuarioabertura)
+        .get();
+    if (docSnapshot.docs.isNotEmpty) {
+      return Ticket.fromJson(
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<Ticket?> getConcluido() async {
+    final docSnapshot = await firestoreService
+        .getCollection()
+        .where("status", isEqualTo: 'Concluido')
+        .get();
+    if (docSnapshot.docs.isNotEmpty) {
+      return Ticket.fromJson(
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
     }
     return null;
   }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:selecaosicoob/bin/home_page.dart';
+import 'package:selecaosicoob/bin/pages/home_page/home_page.dart';
 import 'package:selecaosicoob/firebase_options.dart';
 
 import 'bin/model/project_info_model.dart';

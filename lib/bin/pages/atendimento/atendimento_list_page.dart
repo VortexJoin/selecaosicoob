@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -49,6 +52,11 @@ class _ViewAtendimentoPageState extends State<ViewAtendimentoPage> {
         onSubmitted: (value) => pageController.search(),
       ),
     );
+  }
+
+  int generateRandomInt(int min, int max) {
+    final random = Random();
+    return min + random.nextInt(max - min + 1);
   }
 
   @override
@@ -119,12 +127,30 @@ class _ViewAtendimentoPageState extends State<ViewAtendimentoPage> {
                 ElevatedButton(
                   onPressed: () {
                     int dia = 15;
+
+                    DateTime inicioAtendimento = DateTime(
+                      2023,
+                      02,
+                      dia,
+                      generateRandomInt(08, 10),
+                      generateRandomInt(10, 30),
+                      00,
+                    );
+                    DateTime encerrado = DateTime(
+                      2023,
+                      02,
+                      dia,
+                      generateRandomInt(10, 17),
+                      generateRandomInt(1, 59),
+                      00,
+                    );
+
                     controller.setdata(
                       Ticket(
                           assunto: 'Abertura de chamado',
                           conteudo: 'muita coisa aqui dentro',
                           usuarioabertura: 'a6054d3c',
-                          abertura: DateTime(2023, 02, dia, 8, 25, 00),
+                          abertura: DateTime(2023, 02, dia, 8, 10, 00),
                           ultimamovimentacao: DateTime.now(),
                           setorinicial: '3579008c',
                           setoratual: '3579008c',
@@ -134,8 +160,8 @@ class _ViewAtendimentoPageState extends State<ViewAtendimentoPage> {
                           urgencia: 'Alta',
                           avaliacao: Avaliacao(
                               nota: 3, comentario: 'gostei do atendimento'),
-                          encerrado: DateTime(2023, 02, dia, 8, 50, 00),
-                          inicioAtendimento: DateTime(2023, 02, dia, 8, 23, 00),
+                          encerrado: encerrado,
+                          inicioAtendimento: inicioAtendimento,
                           status: 'Concluido',
                           movimentacao: [
                             Movimentacao(
@@ -178,37 +204,31 @@ class _ViewAtendimentoPageState extends State<ViewAtendimentoPage> {
                 ),
                 TextButton(
                     onPressed: () {
-                      List<SLA> demandas = [];
+                      List<SlaCalculator> calculators = [];
 
                       controller.dados
                           .where((el) => el.status.toLowerCase() == 'concluido')
                           .toList()
                           .forEach((ticket) {
-                        SLA tmpSLA = SLA(
-                          data: DateTime(
-                            ticket.abertura.year,
-                            ticket.abertura.month,
-                            ticket.abertura.day,
-                          ),
-                          horaPrimeiraResposta:
-                              ticket.mensagem.first.datamensagem,
-                          horaInicio: ticket.abertura,
-                          horaTermino: ticket.encerrado!,
-                        );
-                        tmpSLA.calcularTempos();
+                        if (kDebugMode) {
+                          print(ticket.codigo);
+                          print(ticket.abertura);
+                          print(ticket.inicioAtendimento!);
+                        }
 
-                        demandas.add(tmpSLA);
+                        SlaCalculator slaCalc = SlaCalculator(
+                            inicioChamado: ticket.abertura,
+                            primeiraMensagem: ticket.inicioAtendimento!,
+                            terminoChamado: ticket.encerrado!);
+
+                        calculators.add(slaCalc);
                       });
 
-                      // for (var e in demandas) {
-                      //   e.calcularTempos();
-                      //   print(e.toString());
-                      // }
-
-                      Navigator.push(
-                        context,
+                      SlaStatistics slaStatistics = SlaStatistics(calculators);
+                      Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => SLAChart(slaList: demandas),
+                          builder: (context) =>
+                              SlaStatisticsScreen(slaStatistics: slaStatistics),
                         ),
                       );
                     },

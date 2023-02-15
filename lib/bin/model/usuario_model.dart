@@ -104,7 +104,7 @@ class UsuarioController extends ChangeNotifier {
       if (filtroDescricao.isNotEmpty) {
         await firestoreService
             .getCollection()
-            // TODO - aguardando index
+
             //.where('nome', isEqualTo: filtroDescricao)
             .orderBy(_orderField)
             .get()
@@ -167,12 +167,10 @@ class UsuarioController extends ChangeNotifier {
     final docSnapshot = await firestoreService
         .getCollection()
         .where("codigo", isEqualTo: codigo)
-        .orderBy("codigo")
-        .orderBy(_orderField)
         .get();
     if (docSnapshot.docs.isNotEmpty) {
       return Usuario.fromJson(
-          docSnapshot.docs.first.data as Map<String, dynamic>);
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
     }
     return null;
   }
@@ -181,12 +179,22 @@ class UsuarioController extends ChangeNotifier {
     final docSnapshot = await firestoreService
         .getCollection()
         .where("nome", isEqualTo: nome)
-        .orderBy("nome")
-        .orderBy(_orderField)
         .get();
     if (docSnapshot.docs.isNotEmpty) {
       return Usuario.fromJson(
-          docSnapshot.docs.first.data as Map<String, dynamic>);
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
+    }
+    return null;
+  }
+
+  Future<Usuario?> getUsuarioByEmail(String email) async {
+    final docSnapshot = await firestoreService
+        .getCollection()
+        .where("email", isEqualTo: email)
+        .get();
+    if (docSnapshot.docs.isNotEmpty) {
+      return Usuario.fromJson(
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
     }
     return null;
   }

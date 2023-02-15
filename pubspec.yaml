@@ -45,8 +45,11 @@ dependencies:
     sdk: flutter
   cloud_firestore: ^4.3.2
   get_it: ^7.2.0
-  community_charts_flutter: ^1.0.1
+  #community_charts_flutter: ^1.0.1
   syncfusion_flutter_charts: ^20.4.50
+  adaptive_dialog: ^1.8.2
+  email_validator: ^2.1.17
+  sn_progress_dialog: ^1.1.3
   
   #easy_sidemenu: ^0.4.1+1
   #flutter_side_menu: ^0.2.1

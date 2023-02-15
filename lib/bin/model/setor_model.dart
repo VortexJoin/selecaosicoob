@@ -86,7 +86,7 @@ class SetorController extends ChangeNotifier {
       if (filtroDescricao.isNotEmpty) {
         await firestoreService
             .getCollection()
-            //  TODO - aguardando index
+
             //.where("descricao", arrayContains: filtroDescricao.toLowerCase())
             .orderBy(_orderField)
             .get()

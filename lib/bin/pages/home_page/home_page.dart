@@ -1,11 +1,15 @@
 // ignore_for_file: avoid_print
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:selecaosicoob/bin/pages/atendimento/atendimento_list_page.dart';
+import 'package:selecaosicoob/bin/pages/home_page/home_page_controller.dart';
 import 'package:selecaosicoob/bin/pages/setor/setor_list_page.dart';
 import 'package:selecaosicoob/bin/pages/usuario/usuario_list_page.dart';
+import 'package:sn_progress_dialog/progress_dialog.dart';
 
-import 'model/project_info_model.dart';
+import '../../model/project_info_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,10 +19,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  HomePageController controller = HomePageController();
   @override
   void initState() {
     super.initState();
   }
+
+  TextEditingController txtEmailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -69,14 +76,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
       ),
-      body: Row(
+      body: Column(
         children: [
-          Expanded(
-            child: Container(
-              color: Colors.white,
-              child: const Center(
-                child: Text(
-                  'body',
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: SizedBox(
+              height: 80,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 450,
+                      child: TextFormField(
+                        controller: txtEmailController,
+                        decoration: const InputDecoration(
+                          label: Text('E-mail'),
+                        ),
+                        maxLines: 1,
+                        onFieldSubmitted: (value) => loginAtendimento(),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                      width: 10,
+                    ),
+                    ElevatedButton(
+                      onPressed: () => loginAtendimento(),
+                      child: const Text('Acessar Area de Atendimento'),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -85,7 +114,46 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
     );
   }
+
+  Future<void> loginAtendimento() async {
+    if (txtEmailController.text.isEmpty ||
+        !EmailValidator.validate(txtEmailController.text)) {
+      showOkAlertDialog(
+        context: context,
+        message: 'Verifique o E-mail',
+        title: 'Atenção',
+      );
+    } else {
+      ProgressDialog pd = ProgressDialog(context: context);
+      pd.show(msg: 'Carregando...');
+      controller.getUsuarioByEmail(txtEmailController.text).then((usr) {
+        pd.close();
+        if (usr == null) {
+          showOkAlertDialog(
+            context: context,
+            message: 'Usuario não localizado!!',
+            title: 'Atenção',
+          );
+        } else {
+          showOkAlertDialog(
+            context: context,
+            message: 'Bem-Vindo ${usr.nome}',
+            title: ':)',
+          );
+        }
+      }).onError((error, stackTrace) {
+        pd.close();
+        showOkAlertDialog(
+          context: context,
+          message: 'Erro na solicitação $error',
+          title: 'Atenção',
+        );
+      });
+    }
+  }
 }
+
+
 
 /*
 TODO ANOTAÇÕES
