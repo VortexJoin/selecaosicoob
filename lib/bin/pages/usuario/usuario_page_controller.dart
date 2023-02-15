@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../model/setor_model.dart';
@@ -22,57 +23,9 @@ class UsuarioPageController extends ChangeNotifier {
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return ValueListenableBuilder(
-          valueListenable: setores,
-          builder: (context, value, child) {
-            return AlertDialog(
-              title: const Text(
-                'Editar Setores do Usuario',
-                textAlign: TextAlign.center,
-              ),
-              content: SizedBox(
-                  height: 500,
-                  width: 500,
-                  child: ListView.builder(
-                    itemCount: setores.value.length,
-                    itemBuilder: (context, index) {
-                      Setor setor = setores.value[index];
-                      return CheckboxListTile(
-                        title: Text(setor.descricao),
-                        subtitle: Text(setor.codigo),
-                        onChanged: (value) {
-                          setores.value[index].checkBox = value!;
-
-                          print('${setor.descricao}||$value');
-                        },
-                        value: setor.checkBox,
-                      );
-                    },
-                  )),
-              actions: <Widget>[
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('Cancelar'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('Salvar'),
-                  onPressed: () async {
-                    await controller
-                        .setdata(data)
-                        .then((value) => Navigator.of(context).pop());
-                  },
-                ),
-              ],
-            );
-          },
+        return DialogSelecionaSetoresUsuario(
+          data: data,
+          controller: controller,
         );
       },
     );
@@ -223,5 +176,119 @@ class UsuarioPageController extends ChangeNotifier {
     searchQueryController.clear();
     updateSearchQuery("");
     notifyListeners();
+  }
+}
+
+class DialogSelecionaSetoresUsuario extends StatefulWidget {
+  final Usuario data;
+  final UsuarioController controller;
+
+  const DialogSelecionaSetoresUsuario(
+      {super.key, required this.data, required this.controller});
+
+  @override
+  State<DialogSelecionaSetoresUsuario> createState() =>
+      _DialogSelecionaSetoresUsuarioState();
+}
+
+class _DialogSelecionaSetoresUsuarioState
+    extends State<DialogSelecionaSetoresUsuario> {
+  SetorController setorController = SetorController();
+  ValueNotifier<List<Setor>> setores = ValueNotifier([]);
+  @override
+  void initState() {
+    super.initState();
+    setorController.getData().then((value) {
+      setores.value = setorController.listaSetor
+          .map(
+            (e) => Setor(
+              descricao: e.descricao,
+              codigo: e.codigo,
+              uid: e.uid,
+              checkBox: (widget.data.setores
+                  .where((st) => st == e.codigo)
+                  .isNotEmpty),
+            ),
+          )
+          .toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: setores,
+      builder: (context, listaSetoresLocal, child) {
+        return AlertDialog(
+          title: const Text(
+            'Editar Setores do Usuario',
+            textAlign: TextAlign.center,
+          ),
+          content: SizedBox(
+            height: 500,
+            width: 500,
+            child: ValueListenableBuilder(
+                valueListenable: setores,
+                builder: (context, listaSetoresLocal, child) {
+                  return ListView.builder(
+                    itemCount: setores.value.length,
+                    itemBuilder: (context, index) {
+                      Setor setor = setores.value[index];
+                      return CheckboxListTile(
+                        title: Text(setor.descricao),
+                        subtitle: Text(setor.codigo),
+                        onChanged: (value) {
+                          if (value!) {
+                            // usuario.setores.removeWhere((st) => st == setor.codigo);
+                          } else {
+                            // usuario.setores.add(setor.codigo);
+                          }
+
+                          setores.value[index].checkBox = value;
+
+                          if (kDebugMode) {
+                            print(
+                              '${setor.descricao}||$value||${setor.checkBox}',
+                            );
+                          }
+                          setState(() {});
+                        },
+                        value: setores
+                            .value[index].checkBox, //checkSetor(setor.codigo),
+                      );
+                    },
+                  );
+                }),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Salvar'),
+              onPressed: () async {
+                Usuario usuario = widget.data;
+                usuario.setores = setores.value
+                    .where((setor) => setor.checkBox)
+                    .map((e) => e.codigo)
+                    .toList();
+                await widget.controller
+                    .setdata(usuario)
+                    .then((value) => Navigator.of(context).pop());
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

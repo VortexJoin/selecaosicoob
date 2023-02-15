@@ -104,8 +104,13 @@ class _ViewListUsuarioState extends State<ViewListUsuario> {
               } else if (usuarioController.hasError) {
                 return Expanded(
                   child: Center(
-                    child: Text(
-                        'Ops, Não conseguimos carregar os dados.\r\n${usuarioController.error}'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Ops, Não conseguimos carregar os dados.\r\n${usuarioController.error}',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
                 );
               } else if (usuarioController.hasData) {

@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../services/firestore_service.dart';
@@ -91,6 +91,9 @@ class UsuarioController extends ChangeNotifier {
 
   _setError(String error) {
     _hasError = error;
+    if (kDebugMode) {
+      print(error);
+    }
     notifyListeners();
   }
 
@@ -101,13 +104,16 @@ class UsuarioController extends ChangeNotifier {
       if (filtroDescricao.isNotEmpty) {
         await firestoreService
             .getCollection()
-            .where("nome", arrayContains: filtroDescricao.toLowerCase())
-            .orderBy("nome")
+            // TODO - aguardando index
+            //.where('nome', isEqualTo: filtroDescricao)
             .orderBy(_orderField)
             .get()
             .then((snapshot) {
           _dados = snapshot.docs
               .map((e) => Usuario.fromJson(e.data() as Map<String, dynamic>))
+              .toList()
+              .where((a) =>
+                  a.nome.toLowerCase().contains(filtroDescricao.toLowerCase()))
               .toList();
         });
       } else {

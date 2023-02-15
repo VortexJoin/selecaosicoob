@@ -72,6 +72,9 @@ class SetorController extends ChangeNotifier {
   }
 
   _setError(String error) {
+    if (kDebugMode) {
+      print(error);
+    }
     _hasError = error;
     notifyListeners();
   }
@@ -83,13 +86,18 @@ class SetorController extends ChangeNotifier {
       if (filtroDescricao.isNotEmpty) {
         await firestoreService
             .getCollection()
-            .where("descricao", arrayContains: filtroDescricao.toLowerCase())
-            .orderBy("descricao")
+            //  TODO - aguardando index
+            //.where("descricao", arrayContains: filtroDescricao.toLowerCase())
             .orderBy(_orderField)
             .get()
             .then((snapshot) {
           _listaSetor = snapshot.docs
               .map((e) => Setor.fromJson(e.data() as Map<String, dynamic>))
+              .toList()
+              .toList()
+              .where((a) => a.descricao
+                  .toLowerCase()
+                  .contains(filtroDescricao.toLowerCase()))
               .toList();
         });
       } else {
