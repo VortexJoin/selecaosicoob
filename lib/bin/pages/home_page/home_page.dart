@@ -10,6 +10,7 @@ import 'package:selecaosicoob/bin/pages/usuario/usuario_list_page.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
 
 import '../../model/project_info_model.dart';
+import '../agente/agente_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -139,6 +140,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             context: context,
             message: 'Bem-Vindo ${usr.nome}',
             title: ':)',
+          );
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AgenteView(usuario: usr),
+            ),
           );
         }
       }).onError((error, stackTrace) {

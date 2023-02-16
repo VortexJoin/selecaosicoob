@@ -1,3 +1,5 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -110,26 +112,37 @@ class UsuarioPageController extends ChangeNotifier {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('Salvar'),
               onPressed: () async {
-                if (hasData) {
-                  data.nome = nomeController.text;
-                  data.tipo = tipoUser.value;
-                  await controller
-                      .setdata(data)
-                      .then((value) => Navigator.of(context).pop());
+                var valida = validaCampos(
+                    email: emailController.text, nome: nomeController.text);
+                if (valida.isNotEmpty) {
+                  showOkAlertDialog(
+                    context: context,
+                    message: 'Verifique : $valida',
+                    title: 'Atenção',
+                  );
                 } else {
-                  await controller
-                      .setdata(Usuario(
-                        nome: nomeController.text,
-                        email: emailController.text,
-                        senha: '',
-                        setores: [],
-                        tipo: tipoUser.value,
-                      ))
-                      .then((value) => Navigator.of(context).pop());
+                  if (hasData) {
+                    data.nome = nomeController.text;
+                    data.tipo = tipoUser.value;
+                    data.email = emailController.text;
+                    await controller
+                        .setdata(data)
+                        .then((value) => Navigator.of(context).pop());
+                  } else {
+                    await controller
+                        .setdata(Usuario(
+                          nome: nomeController.text,
+                          email: emailController.text,
+                          senha: '',
+                          setores: [],
+                          tipo: tipoUser.value,
+                        ))
+                        .then((value) => Navigator.of(context).pop());
+                  }
                 }
               },
+              child: const Text('Salvar'),
             ),
           ],
         );
@@ -138,6 +151,19 @@ class UsuarioPageController extends ChangeNotifier {
 
     Future.delayed(const Duration(milliseconds: 500))
         .then((value) => initialData());
+  }
+
+  String validaCampos({required String email, required String nome}) {
+    String retorno = '';
+    if (EmailValidator.validate(email) == false) {
+      return 'Email';
+    }
+
+    if (nome.length < 3) {
+      return 'Nome';
+    }
+
+    return retorno;
   }
 
   void initialData() {

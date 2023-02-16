@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -265,6 +266,10 @@ class TicketController extends ChangeNotifier {
     _setLoading();
   }
 
+  CollectionReference getCollection() {
+    return firestoreService.getCollection();
+  }
+
   Future<bool> setdata(Ticket usuario, {bool refreshData = false}) async {
     // ESSE METODO SERVE TANTO PARA INSERIR QUANTO PARA EDITAR
     _setLoading();
@@ -309,16 +314,14 @@ class TicketController extends ChangeNotifier {
     return null;
   }
 
-  Future<Ticket?> getBySetor(String setoratual) async {
+  Future<List<Ticket>> getBySetores(List<String> setores) async {
     final docSnapshot = await firestoreService
         .getCollection()
-        .where("setoratual", isEqualTo: setoratual)
+        .where("setoratual", arrayContainsAny: setores)
         .get();
-    if (docSnapshot.docs.isNotEmpty) {
-      return Ticket.fromJson(
-          docSnapshot.docs.first.data() as Map<String, dynamic>);
-    }
-    return null;
+    return docSnapshot.docs
+        .map((e) => Ticket.fromJson(e.data() as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Ticket?> getByResponsavelAtual(String responsavelatual) async {
