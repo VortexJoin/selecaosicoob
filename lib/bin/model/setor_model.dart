@@ -150,13 +150,11 @@ class SetorController extends ChangeNotifier {
   Future<Setor?> getByCodigo(String codigo) async {
     final docSnapshot = await firestoreService
         .getCollection()
-        .where("codigo", isEqualTo: codigo)
-        .orderBy("codigo")
-        .orderBy(_orderField)
+        .where("codigoSetor", isEqualTo: codigo)
         .get();
     if (docSnapshot.docs.isNotEmpty) {
       return Setor.fromJson(
-          docSnapshot.docs.first.data as Map<String, dynamic>);
+          docSnapshot.docs.first.data() as Map<String, dynamic>);
     }
     return null;
   }

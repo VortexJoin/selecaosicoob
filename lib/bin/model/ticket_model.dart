@@ -60,31 +60,27 @@ class Ticket {
   Avaliacao? avaliacao;
 
   factory Ticket.fromJson(Map<String, dynamic> json) => Ticket(
-        codigo: json["codigo"],
-        uid: json["uid"],
-        assunto: json["assunto"],
-        conteudo: json["conteudo"],
-        usuarioabertura: json["usuarioabertura"],
-        responsavel: json["responsavel"] ?? '',
-        responsavelatual: json["responsavelatual"] ?? '',
+        codigo: json["codigo"].toString(),
+        uid: json["uid"].toString(),
+        assunto: json["assunto"].toString(),
+        conteudo: json["conteudo"].toString(),
+        usuarioabertura: json["usuarioabertura"].toString(),
+        responsavel: json["responsavel"],
+        responsavelatual: json["responsavelatual"],
         abertura: DateTime.parse(json["abertura"]),
-        encerrado: (json["encerrado"].toString().isEmpty)
-            ? null
-            : DateTime.parse(json["encerrado"]),
+        encerrado: DateTime.tryParse(json["encerrado"]),
         ultimamovimentacao: DateTime.parse(json["ultimamovimentacao"]),
-        setorinicial: json["setorinicial"],
-        setoratual: json["setoratual"],
-        tipo: json["tipo"],
-        urgencia: json["urgencia"],
-        status: json["status"],
-        inicioAtendimento: (json["inicioAtendimento"].toString().isEmpty)
-            ? null
-            : DateTime.parse(json["inicioAtendimento"]),
+        setorinicial: json["setorinicial"].toString(),
+        setoratual: json["setoratual"].toString(),
+        tipo: json["tipo"].toString(),
+        urgencia: json["urgencia"].toString(),
+        status: json["status"].toString(),
+        inicioAtendimento: DateTime.tryParse(json["inicioAtendimento"]),
         mensagem: List<Mensagem>.from(
             json["mensagem"].map((x) => Mensagem.fromJson(x))),
         movimentacao: List<Movimentacao>.from(
             json["movimentacao"].map((x) => Movimentacao.fromJson(x))),
-        avaliacao: (json["inicioAtendimento"].toString().isEmpty)
+        avaliacao: (json["avaliacao"]).toString().isEmpty
             ? null
             : Avaliacao.fromJson(json["avaliacao"]),
       );

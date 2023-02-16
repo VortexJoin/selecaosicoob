@@ -1,7 +1,27 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:selecaosicoob/bin/model/ticket_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+Widget montaSLA(List<Ticket> data, {bool showAppBar = true}) {
+  List<SlaCalculator> slaCalc = data
+      .where((tk) => tk.encerrado != null && tk.inicioAtendimento != null)
+      .map(
+        (e) => SlaCalculator(
+          inicioChamado: e.abertura,
+          terminoChamado: e.encerrado!,
+          primeiraMensagem: e.inicioAtendimento!,
+        ),
+      )
+      .toList();
+  SlaStatistics slaStatistics = SlaStatistics(slaCalc);
+
+  return SlaStatisticsScreen(
+    slaStatistics: slaStatistics,
+    showSLA: showAppBar,
+  );
+}
 
 class SlaParams {
   final int atendimentoInicio; // hora de início do atendimento
@@ -113,8 +133,14 @@ class _ChartData {
 
 class SlaStatisticsScreen extends StatefulWidget {
   final SlaStatistics slaStatistics;
+  final bool showSLA;
+  final SlaParams? slaParams;
 
-  const SlaStatisticsScreen({Key? key, required this.slaStatistics})
+  const SlaStatisticsScreen(
+      {Key? key,
+      required this.slaStatistics,
+      this.showSLA = true,
+      this.slaParams})
       : super(key: key);
 
   @override
@@ -122,12 +148,25 @@ class SlaStatisticsScreen extends StatefulWidget {
 }
 
 class SlaStatisticsScreenState extends State<SlaStatisticsScreen> {
+  late SlaParams slaParams;
+  @override
+  void initState() {
+    if (widget.slaParams != null) {
+      slaParams = widget.slaParams!;
+    } else {
+      slaParams = SlaParams();
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SLA Statistics'),
-      ),
+      appBar: (widget.showSLA)
+          ? AppBar(
+              title: const Text('SLA Statistics'),
+            )
+          : null,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -180,6 +219,20 @@ class SlaStatisticsScreenState extends State<SlaStatisticsScreen> {
                   dataLabelSettings: const DataLabelSettings(isVisible: true),
                 )
               ],
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Regras do SLA :\r\n'
+                  '-Inicio do Atendimento : ${slaParams.atendimentoInicio}\r\n'
+                  '-Fim do Atendimento : ${slaParams.atendimentoFim}\r\n'
+                  '-Tempo Maximo de Solução : ${slaParams.tempoMaximoResolucao} \r\n'
+                  '-Tempo Maximo de Resposta ${slaParams.tempoMinimoResposta} \r\n',
+                  textAlign: TextAlign.start,
+                ),
+              ),
             )
           ],
         ),

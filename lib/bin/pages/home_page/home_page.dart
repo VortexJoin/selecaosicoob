@@ -82,13 +82,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: SizedBox(
-              height: 80,
+              height: 200,
+              width: 400,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
+                child: Column(
                   children: [
                     SizedBox(
-                      width: 450,
+                      width: 400,
                       child: TextFormField(
                         controller: txtEmailController,
                         decoration: const InputDecoration(
@@ -136,11 +137,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             title: 'Atenção',
           );
         } else {
-          showOkAlertDialog(
-            context: context,
-            message: 'Bem-Vindo ${usr.nome}',
-            title: ':)',
-          );
+          // showOkAlertDialog(
+          //   context: context,
+          //   message: 'Bem-Vindo ${usr.nome}',
+          //   title: ':)',
+          // );
 
           Navigator.push(
             context,

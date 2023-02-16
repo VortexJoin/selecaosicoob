@@ -1,9 +1,13 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 import 'package:selecaosicoob/bin/model/usuario_model.dart';
 import 'package:selecaosicoob/bin/pages/agente/agente_controller.dart';
 
 import '../../model/project_info_model.dart';
+import '../../model/ticket_model.dart';
 
 class AgenteView extends StatefulWidget {
   final Usuario usuario;
@@ -33,16 +37,17 @@ class _AgenteViewState extends State<AgenteView> {
         title: Text(
             '${GetIt.instance<ProjectInfo>().nome} - Painel Administrativo'),
       ),
-      body: Column(
+      body: Flex(
+        direction: Axis.vertical,
         children: [
-          AnimatedBuilder(
-            animation: agenteController,
-            builder: (context, child) {
-              return Container(
-                padding: const EdgeInsets.all(8.0),
-                height: 80,
-                width: size.width,
-                child: Wrap(
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            height: 60,
+            width: size.width,
+            child: AnimatedBuilder(
+              animation: agenteController,
+              builder: (context, child) {
+                return Wrap(
                   spacing: 10,
                   children: [
                     FilterChip(
@@ -53,13 +58,16 @@ class _AgenteViewState extends State<AgenteView> {
                             .streamAtendimentosPendentesNoSetor(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                            return const SizedBox(
+                              width: 50,
+                              //  height: 10,
+                              child: LinearProgressIndicator(),
                             );
                           }
                           return Text(
                             'a Receber (${snapshot.data!.length})',
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.visible,
                           );
                         },
                       ),
@@ -72,18 +80,20 @@ class _AgenteViewState extends State<AgenteView> {
                       avatar: const Icon(Icons.history),
                       showCheckmark: false,
                       label: StreamBuilder(
-                        stream:
-                            agenteController.streamGetMeusAtendimentosAbertos(),
+                        stream: agenteController
+                            .streamGetMeusAtendimentosIniciados(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             return const SizedBox(
-                              width: 30,
+                              width: 50,
+                              // height: 10,
                               child: LinearProgressIndicator(),
                             );
                           }
                           return Text(
                             'em Atendimento (${snapshot.data!.length})',
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.visible,
                           );
                         },
                       ),
@@ -102,13 +112,15 @@ class _AgenteViewState extends State<AgenteView> {
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             return const SizedBox(
-                              width: 30,
+                              width: 50,
+                              //  height: 10,
                               child: LinearProgressIndicator(),
                             );
                           }
                           return Text(
                             'Concluidos (${snapshot.data!.length})',
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.visible,
                           );
                         },
                       ),
@@ -118,131 +130,119 @@ class _AgenteViewState extends State<AgenteView> {
                       selected:
                           (agenteController.selectedFilter == 'concluido'),
                     ),
+                    FilterChip(
+                      avatar: const Icon(Icons.add),
+                      showCheckmark: false,
+                      label: const Text(
+                        'Novo Chamado',
+                        overflow: TextOverflow.visible,
+                        textAlign: TextAlign.center,
+                      ),
+                      onSelected: (value) {},
+                    ),
+                    FilterChip(
+                      avatar: const Icon(Icons.auto_graph_outlined),
+                      showCheckmark: false,
+                      label: const Text(
+                        'Relatorios SLA',
+                        overflow: TextOverflow.visible,
+                        textAlign: TextAlign.center,
+                      ),
+                      onSelected: (value) {
+                        agenteController.setFilter('sla');
+                      },
+                      selected: (agenteController.selectedFilter == 'sla'),
+                    ),
                   ],
-                ),
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: SizedBox(
-              height: 200,
-              child: Row(
-                children: [
-                  InkWell(
-                    onTap: () {},
-                    splashColor: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(20),
-                    child: baseContainer(
-                      child: StreamBuilder(
-                        stream: agenteController
-                            .streamAtendimentosPendentesNoSetor(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox(
-                              width: 30,
-                              child: LinearProgressIndicator(),
-                            );
-                          }
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                height: 30,
-                              ),
-                              Text(
-                                'Atendimentos em Aberto',
-                                textAlign: TextAlign.center,
-                                // style: theme.textTheme.titleLarge!.copyWith(
-                                //    decoration: TextDecoration.underline),
-                                style: theme.textTheme.titleLarge,
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                '${snapshot.data!.length}',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.titleLarge,
-                                // style: theme.textTheme.titleMedium!.copyWith(
-                                //     decoration: TextDecoration.underline),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              const SizedBox(
-                                width: 30,
-                                child: LinearProgressIndicator(
-                                    backgroundColor: Colors.transparent),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      cor: Colors.orange,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                    width: 15,
-                  ),
-                  InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(20),
-                    child: baseContainer(
-                      child: StreamBuilder(
-                        stream:
-                            agenteController.streamGetMeusAtendimentosAbertos(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                height: 30,
-                              ),
-                              Text(
-                                'Meus Atendimentos',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.titleLarge,
-                                // style: theme.textTheme.titleLarge!.copyWith(
-                                //    decoration: TextDecoration.underline),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                '${snapshot.data!.length}',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.titleLarge,
-                                //  style: theme.textTheme.titleMedium!.copyWith(
-                                //       decoration: TextDecoration.underline),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              const SizedBox(
-                                width: 30,
-                                child: LinearProgressIndicator(
-                                    backgroundColor: Colors.transparent),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      cor: Colors.blue,
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
-          )
+          ),
+          Expanded(
+            child: AnimatedBuilder(
+              animation: agenteController,
+              builder: (context, child) {
+                return StreamBuilder(
+                  stream: agenteController.streamWhereSelectedFilter(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError) {
+                      print(snapshot.error);
+                      return SizedBox(
+                        width: size.width / 2,
+                        child: Text('Erro ao buscar!\r\n${snapshot.error}'),
+                      );
+                    } else if (snapshot.hasData) {
+                      return (agenteController.selectedFilter == 'sla')
+                          ? agenteController.pageRelatorio(snapshot.data!)
+                          : ListView.builder(
+                              itemCount: snapshot.data!.length,
+                              itemBuilder: (context, index) {
+                                Ticket ticket = snapshot.data![index];
+                                return ListTile(
+                                  title: Text(
+                                      '${ticket.assunto} - ${ticket.codigo}'),
+                                  subtitle: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      FutureBuilder<String>(
+                                        future: agenteController
+                                            .getUserCod(ticket.usuarioabertura),
+                                        builder: (context, snapshot) {
+                                          if (!snapshot.hasData) {
+                                            return const Text('- ');
+                                          } else {
+                                            return Text('- ${snapshot.data}');
+                                          }
+                                        },
+                                      ),
+                                      Text(
+                                        '- ${DateFormat("dd/MM/yyy hh:mm:ss").format(ticket.abertura)}',
+                                      ),
+                                      Text(
+                                        '- ${ticket.status}',
+                                      ),
+                                      FutureBuilder<String>(
+                                        future: agenteController
+                                            .getSetorName(ticket.setoratual),
+                                        builder: (context, snapshot) {
+                                          if (!snapshot.hasData) {
+                                            return const Text('- ');
+                                          } else {
+                                            return Text('- ${snapshot.data}');
+                                          }
+                                        },
+                                      ),
+                                      Text(
+                                        '- ${ticket.urgencia}',
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {},
+                                  leading: agenteController.getIconbyStatus(
+                                    context,
+                                    ticket.status,
+                                  ),
+                                  trailing:
+                                      agenteController.ticketOption(ticket),
+                                );
+                              },
+                            );
+                    } else {
+                      return const SizedBox(
+                        child: Text('Sem Dados'),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
