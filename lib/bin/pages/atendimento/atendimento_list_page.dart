@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
+import 'package:selecaosicoob/bin/model/usuario_model.dart';
+import 'package:selecaosicoob/bin/pages/agente/agente_controller.dart';
 
 import '../../model/sla_model.dart';
 import '../../model/project_info_model.dart';
@@ -268,12 +270,14 @@ class _ViewAtendimentoPageState extends State<ViewAtendimentoPage> {
                         ),
                         onTap: () {},
                         leading: const Icon(Icons.work_history),
-                        trailing: IconButton(
-                          onPressed: () {
-                            pageController.novo(context, data: data);
-                          },
-                          icon: const Icon(Icons.edit),
-                        ),
+                        trailing: AgenteController(
+                          usuario: Usuario(
+                            nome: '',
+                            email: '',
+                            senha: '',
+                          ),
+                          onlyRead: true,
+                        ).ticketOption(data: data, context: context),
                       );
                     },
                   ),

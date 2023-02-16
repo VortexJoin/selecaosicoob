@@ -1,20 +1,24 @@
 // ignore_for_file: avoid_print
 
-import 'dart:convert';
-
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:custom_rating_bar/custom_rating_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:selecaosicoob/bin/model/setor_model.dart';
 import 'package:selecaosicoob/bin/model/sla_model.dart';
 import 'package:selecaosicoob/bin/model/usuario_model.dart';
+import 'package:selecaosicoob/bin/pages/atendimento/novo_page.dart';
+import 'package:sn_progress_dialog/progress_dialog.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../model/ticket_model.dart';
+import '../atendimento/visualiza_page.dart';
 
 class AgenteController extends ChangeNotifier {
   final Usuario usuario;
 
-  AgenteController({required this.usuario});
+  final bool onlyRead;
+  AgenteController({required this.usuario, this.onlyRead = false});
 
   UsuarioController usuarioController = UsuarioController();
   TicketController ticketController = TicketController();
@@ -53,11 +57,15 @@ class AgenteController extends ChangeNotifier {
     return retorno;
   }
 
-  Future<String> getUserCod(String cod) async {
+  Future<String> getUserCod(String cod, {bool showNaoEncontrado = true}) async {
     String retorno = '';
     await usuarioController.getByCodigo(cod).then((value) {
       if (value == null) {
-        retorno = 'Não encontrado ($cod)';
+        if (showNaoEncontrado) {
+          retorno = 'Não encontrado ($cod)';
+        } else {
+          retorno = '';
+        }
       } else {
         retorno = value.nome;
       }
@@ -81,7 +89,7 @@ class AgenteController extends ChangeNotifier {
           color: Theme.of(context).colorScheme.primary,
         );
 
-      case 'atentimento':
+      case 'atendimento':
         return Icon(
           Icons.work_history,
           color: Theme.of(context).colorScheme.onSurface,
@@ -156,11 +164,24 @@ class AgenteController extends ChangeNotifier {
     }
   }
 
-  Widget ticketOption(Ticket data) {
+  Widget ticketOption({
+    required Ticket data,
+    required BuildContext context,
+  }) {
     return PopupMenuButton(
-      onSelected: (value) {
+      onSelected: (value) async {
         Ticket tmpTicket = data;
-        if (value == 'visualizar') {}
+        if (value == 'visualizar') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VisualizaTicket(
+                codTicket: data.codigo,
+                usuario: usuario,
+              ),
+            ),
+          );
+        }
 
         if (value == 'receber') {
           tmpTicket.inicioAtendimento ??= DateTime.now();
@@ -207,7 +228,13 @@ class AgenteController extends ChangeNotifier {
 
           ticketController.setdata(tmpTicket);
         }
-        if (value == 'enviarsetor') {}
+        if (value == 'tramitar') {
+          _tramitarTicket(data: data, context: context);
+        }
+
+        if (value == 'finalizar') {
+          _finalizarTicket(data: data, context: context);
+        }
       },
       itemBuilder: (context) {
         return [
@@ -217,17 +244,360 @@ class AgenteController extends ChangeNotifier {
           ),
           PopupMenuItem(
             value: 'receber',
-            enabled: _selectedFilter == 'aberto',
+            enabled: (onlyRead) ? false : _selectedFilter == 'aberto',
             child: const Text("Receber"),
           ),
           PopupMenuItem(
             value: 'tramitar',
-            enabled: _selectedFilter == 'atendimento',
+            enabled: (onlyRead) ? false : _selectedFilter == 'atendimento',
             child: const Text("Tramitar"),
+          ),
+          PopupMenuItem(
+            value: 'finalizar',
+            enabled: (onlyRead) ? false : _selectedFilter == 'atendimento',
+            child: const Text("Finalizar"),
           ),
         ];
       },
     );
+  }
+
+  _finalizarTicket({
+    required Ticket data,
+    required BuildContext context,
+  }) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        TextEditingController txtEdtAvaliacao = TextEditingController();
+        ValueNotifier<int> nota = ValueNotifier(3);
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: SingleChildScrollView(
+              child: SizedBox(
+                height: 250,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 40,
+                      child: Center(
+                        child: Text(
+                          'Deseja Realmente Finalizar ?',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Center(
+                      child: Text(
+                        'Avaliação',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    ValueListenableBuilder(
+                      valueListenable: nota,
+                      builder: (context, value, child) {
+                        return RatingBar(
+                          filledIcon: Icons.star,
+                          emptyIcon: Icons.star_border,
+                          onRatingChanged: (rate) {
+                            value = rate.toInt();
+                          },
+                          initialRating: 3,
+                          maxRating: 5,
+                        );
+                      },
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
+                      controller: txtEdtAvaliacao,
+                      decoration: const InputDecoration(
+                        labelText: 'Avaliação do atendimento',
+                      ),
+                    ),
+                    const Expanded(child: SizedBox()),
+                    SizedBox(
+                      height: 60,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const SizedBox(
+                                width: 60,
+                                child: Center(
+                                  child: Text(
+                                    'Não',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                ProgressDialog pd =
+                                    ProgressDialog(context: context);
+                                pd.show(msg: 'Carregando...');
+                                Ticket tmpTicket = data;
+                                tmpTicket.encerrado = DateTime.now();
+
+                                tmpTicket.ultimamovimentacao = DateTime.now();
+
+                                tmpTicket.mensagem.add(
+                                  Mensagem(
+                                    datamensagem: DateTime.now(),
+                                    usuario: usuario.codigo,
+                                    uid: const Uuid().v4().split('-').first,
+                                    conteudo: 'Chamado Finalizado',
+                                  ),
+                                );
+
+                                tmpTicket.movimentacao.add(
+                                  Movimentacao(
+                                    uid: const Uuid().v4().split('-').first,
+                                    usuarioenvio: usuario.codigo,
+                                    usuariodefinido: usuario.codigo,
+                                    datamovimento: DateTime.now(),
+                                  ),
+                                );
+                                tmpTicket.status = 'Concluido';
+                                tmpTicket.avaliacao = Avaliacao(
+                                  nota: nota.value,
+                                  comentario: txtEdtAvaliacao.text,
+                                );
+
+                                ticketController.setdata(tmpTicket);
+
+                                pd.close();
+                                Navigator.pop(context);
+                              },
+                              child: const SizedBox(
+                                width: 100,
+                                child: Center(
+                                  child: Text(
+                                    'Sim',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  novoTicket({
+    required BuildContext context,
+  }) async {
+    if (usuario.codigo.isEmpty) {
+      showOkAlertDialog(
+        context: context,
+        message: 'Usuario não está logado no sistema!',
+        title: 'Atenção',
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return NovoAtendimento(
+            usuarioAbertura: usuario,
+          );
+        },
+      );
+    }
+  }
+
+  novaMensagemTicket({
+    required Ticket data,
+    required BuildContext context,
+  }) async {
+    if (usuario.codigo.isEmpty) {
+      showOkAlertDialog(
+        context: context,
+        message: 'Usuario não está logado no sistema!',
+        title: 'Atenção',
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) {
+          TextEditingController txtEdtAvaliacao = TextEditingController();
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: 250,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: 40,
+                        child: Center(
+                          child: Text(
+                            'Nova Mensagem',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: txtEdtAvaliacao,
+                        decoration: const InputDecoration(
+                          labelText: 'Conteudo',
+                        ),
+                      ),
+                      const Expanded(child: SizedBox()),
+                      SizedBox(
+                        height: 60,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const SizedBox(
+                                  width: 60,
+                                  child: Center(
+                                    child: Text(
+                                      'Cancelar',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  ProgressDialog pd =
+                                      ProgressDialog(context: context);
+                                  pd.show(msg: 'Carregando...');
+                                  Ticket tmpTicket = data;
+                                  tmpTicket.ultimamovimentacao = DateTime.now();
+                                  tmpTicket.mensagem.add(
+                                    Mensagem(
+                                      datamensagem: DateTime.now(),
+                                      usuario: usuario.codigo,
+                                      uid: const Uuid().v4().split('-').first,
+                                      conteudo: txtEdtAvaliacao.text,
+                                    ),
+                                  );
+                                  ticketController.setdata(tmpTicket);
+
+                                  pd.close();
+                                  Navigator.pop(context);
+                                },
+                                child: const SizedBox(
+                                  width: 100,
+                                  child: Center(
+                                    child: Text(
+                                      'Salvar',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  _tramitarTicket({
+    required Ticket data,
+    required BuildContext context,
+  }) async {
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(msg: 'Carregando...');
+
+    setorController.getData().then((value) async {
+      setorController.listaSetor.removeWhere(
+        (element) => element.codigo == data.setoratual,
+      );
+
+      await showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Column(
+            children: [
+              SizedBox(
+                height: 30,
+                child: Center(
+                  child: Text(
+                    'Selecione um Setor',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+              ),
+              Wrap(
+                children: setorController.listaSetor
+                    .map(
+                      (e) => ListTile(
+                        title: Text(e.descricao),
+                        subtitle: Text(e.codigo),
+                        onTap: () {
+                          Ticket tmpTicket = data;
+                          tmpTicket.movimentacao.add(
+                            Movimentacao(
+                              uid: const Uuid().v4().split('-').first,
+                              usuarioenvio: usuario.codigo,
+                              usuariodefinido: usuario.codigo,
+                              datamovimento: DateTime.now(),
+                            ),
+                          );
+                          tmpTicket.mensagem.add(
+                            Mensagem(
+                              datamensagem: DateTime.now(),
+                              usuario: usuario.codigo,
+                              uid: const Uuid().v4().split('-').first,
+                              conteudo: 'Movimentação de Setor',
+                            ),
+                          );
+                          tmpTicket.responsavel = null;
+                          tmpTicket.status = "Aberto";
+                          tmpTicket.setoratual = e.codigo;
+                          ticketController.setdata(tmpTicket);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          );
+        },
+      );
+    });
+
+    pd.close();
   }
 
   Stream<List<Ticket>> streamAtendimentosPendentesNoSetor() => ticketController
@@ -246,7 +616,7 @@ class AgenteController extends ChangeNotifier {
       .where("status", isEqualTo: 'Atendimento')
       .snapshots()
       .map((x) => x.docs.map((doc) {
-            print((doc.data() as Map<String, dynamic>).toString());
+            //print((doc.data() as Map<String, dynamic>).toString());
 
             return Ticket.fromJson(doc.data() as Map<String, dynamic>);
           }).toList());

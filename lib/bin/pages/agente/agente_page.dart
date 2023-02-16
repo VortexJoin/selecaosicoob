@@ -37,18 +37,49 @@ class _AgenteViewState extends State<AgenteView> {
         title: Text(
             '${GetIt.instance<ProjectInfo>().nome} - Painel Administrativo'),
       ),
+      bottomNavigationBar: Container(
+        height: 60,
+        decoration: BoxDecoration(
+            border: Border(
+          top: BorderSide(
+            color: Colors.grey.withOpacity(.5),
+            width: 1,
+          ),
+        )),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FilterChip(
+                avatar: const Icon(Icons.add),
+                showCheckmark: false,
+                label: const Text(
+                  'Novo Chamado',
+                  overflow: TextOverflow.visible,
+                  textAlign: TextAlign.center,
+                ),
+                onSelected: (value) {
+                  agenteController.novoTicket(context: context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Flex(
         direction: Axis.vertical,
         children: [
           Container(
-            padding: const EdgeInsets.all(8.0),
-            height: 60,
+            padding: const EdgeInsets.all(10),
+            //height: 60,
             width: size.width,
             child: AnimatedBuilder(
               animation: agenteController,
               builder: (context, child) {
                 return Wrap(
                   spacing: 10,
+                  runSpacing: 10,
                   children: [
                     FilterChip(
                       avatar: const Icon(Icons.schedule),
@@ -131,16 +162,6 @@ class _AgenteViewState extends State<AgenteView> {
                           (agenteController.selectedFilter == 'concluido'),
                     ),
                     FilterChip(
-                      avatar: const Icon(Icons.add),
-                      showCheckmark: false,
-                      label: const Text(
-                        'Novo Chamado',
-                        overflow: TextOverflow.visible,
-                        textAlign: TextAlign.center,
-                      ),
-                      onSelected: (value) {},
-                    ),
-                    FilterChip(
                       avatar: const Icon(Icons.auto_graph_outlined),
                       showCheckmark: false,
                       label: const Text(
@@ -202,7 +223,8 @@ class _AgenteViewState extends State<AgenteView> {
                                         },
                                       ),
                                       Text(
-                                        '- ${DateFormat("dd/MM/yyy hh:mm:ss").format(ticket.abertura)}',
+                                        '- ${DateFormat("dd/MM/yyy hh:mm:ss").format(ticket.abertura)}'
+                                        ' ${(ticket.encerrado == null) ? '' : 'até ${DateFormat("dd/MM/yyy hh:mm:ss").format(ticket.encerrado!)}'}',
                                       ),
                                       Text(
                                         '- ${ticket.status}',
@@ -228,8 +250,10 @@ class _AgenteViewState extends State<AgenteView> {
                                     context,
                                     ticket.status,
                                   ),
-                                  trailing:
-                                      agenteController.ticketOption(ticket),
+                                  trailing: agenteController.ticketOption(
+                                    data: ticket,
+                                    context: context,
+                                  ),
                                 );
                               },
                             );

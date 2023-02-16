@@ -26,7 +26,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
   }
 
-  TextEditingController txtEmailController = TextEditingController();
+  TextEditingController txtEmailController = TextEditingController(
+    text: 'ronaldo@gmail.com',
+  );
 
   @override
   Widget build(BuildContext context) {

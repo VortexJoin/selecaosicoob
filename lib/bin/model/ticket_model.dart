@@ -266,21 +266,21 @@ class TicketController extends ChangeNotifier {
     return firestoreService.getCollection();
   }
 
-  Future<bool> setdata(Ticket usuario, {bool refreshData = false}) async {
+  Future<bool> setdata(Ticket ticket, {bool refreshData = false}) async {
     // ESSE METODO SERVE TANTO PARA INSERIR QUANTO PARA EDITAR
     _setLoading();
 
-    if (usuario.uid.isEmpty) {
-      usuario.uid = _uuid.v4();
+    if (ticket.uid.isEmpty) {
+      ticket.uid = _uuid.v4();
     }
 
-    if (usuario.codigo.isEmpty) {
-      usuario.codigo = usuario.uid.split('-').first;
+    if (ticket.codigo.isEmpty) {
+      ticket.codigo = ticket.uid.split('-').first;
     }
     try {
       await firestoreService.setdata(
-        item: usuario.toJson(),
-        id: usuario.codigo,
+        item: ticket.toJson(),
+        id: ticket.codigo,
       );
       _setError('');
       _setLoading();
@@ -354,6 +354,14 @@ class TicketController extends ChangeNotifier {
           docSnapshot.docs.first.data() as Map<String, dynamic>);
     }
     return null;
+  }
+
+  Stream<Ticket?> streamByCod(String codigo) {
+    return getCollection().where("codigo", isEqualTo: codigo).snapshots().map(
+        (x) => x.docs
+            .map((doc) => Ticket.fromJson(doc.data() as Map<String, dynamic>))
+            .toList()
+            .first);
   }
 }
 
