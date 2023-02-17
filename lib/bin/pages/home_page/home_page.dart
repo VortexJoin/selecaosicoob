@@ -12,6 +12,8 @@ import 'package:selecaosicoob/bin/pages/home_page/home_page_controller.dart';
 import 'package:selecaosicoob/bin/pages/setor/setor_list_page.dart';
 import 'package:selecaosicoob/bin/pages/usuario/usuario_list_page.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../model/project_info_model.dart';
 import '../agente/agente_page.dart';
@@ -251,6 +253,39 @@ class _HomePageState extends State<HomePage>
           //     },
           //   ),
           // )
+
+          Container(
+            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey.withOpacity(.5),
+                width: 1,
+              ),
+            ),
+            height: 200,
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 30,
+                  child: Text('Informações do Projeto'),
+                ),
+                GestureDetector(
+                  onDoubleTap: () async {
+                    const url =
+                        'https://github.com/ronaldojr1804/selecaosicoob';
+                    if (await canLaunchUrlString(url)) {
+                      await launchUrlString(url);
+                    } else {
+                      throw 'Não foi possível abrir o link $url';
+                    }
+                  },
+                  child: const SelectableText(
+                      'GitHub: https://github.com/ronaldojr1804/selecaosicoob'),
+                )
+              ],
+            ),
+          )
         ],
       ),
     );
