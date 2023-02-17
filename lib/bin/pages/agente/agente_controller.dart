@@ -579,6 +579,7 @@ class AgenteController extends ChangeNotifier {
                               usuario: usuario.codigo,
                               uid: const Uuid().v4().split('-').first,
                               conteudo: 'Movimentação de Setor',
+                              movimentacaoSetor: true,
                             ),
                           );
                           tmpTicket.responsavel = null;

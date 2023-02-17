@@ -53,6 +53,9 @@ dependencies:
   #flutter_rating_bar: ^4.0.1
   custom_rating_bar: ^2.0.4
   dropdown_search: ^5.0.5
+  font_awesome_flutter: ^10.4.0
+  syncfusion_flutter_xlsio: ^20.4.50-beta
+  path_provider: ^2.0.12
   
   #easy_sidemenu: ^0.4.1+1
   #flutter_side_menu: ^0.2.1

@@ -3,6 +3,8 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:selecaosicoob/bin/model/sla_model.dart';
+import 'package:selecaosicoob/bin/model/ticket_model.dart';
 import 'package:selecaosicoob/bin/pages/atendimento/atendimento_list_page.dart';
 import 'package:selecaosicoob/bin/pages/home_page/home_page_controller.dart';
 import 'package:selecaosicoob/bin/pages/setor/setor_list_page.dart';
@@ -11,6 +13,10 @@ import 'package:sn_progress_dialog/progress_dialog.dart';
 
 import '../../model/project_info_model.dart';
 import '../agente/agente_page.dart';
+import 'graficos/movimentados.dart';
+import 'graficos/por_setor.dart';
+import 'graficos/por_usuario.dart';
+import 'graficos/satisfacao_geral.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,19 +25,20 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  HomePageController controller = HomePageController();
-  @override
-  void initState() {
-    super.initState();
-  }
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin<HomePage> {
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
 
-  TextEditingController txtEmailController = TextEditingController(
-    text: 'ronaldo@gmail.com',
-  );
+  @override
+  bool get wantKeepAlive => true;
+  TicketController ticketController = TicketController();
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     // ignore: unused_local_variable
     var size = MediaQuery.of(context).size;
     // ignore: unused_local_variable
@@ -39,10 +46,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text(GetIt.instance<ProjectInfo>().nome),
+        actions: [
+          IconButton(
+              onPressed: () => login(),
+              icon: const Icon(
+                Icons.person,
+              ))
+        ],
       ),
       drawer: Drawer(
         child: Column(
           children: [
+            ListTile(
+              title: const Text('Login'),
+              onTap: () => login(),
+            ),
             ListTile(
               title: const Text('Setores'),
               onTap: () async {
@@ -79,42 +97,218 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
       ),
-      body: Column(
+      body: ListView(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: SizedBox(
-              height: 200,
-              width: 400,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: 400,
-                      child: TextFormField(
-                        controller: txtEmailController,
-                        decoration: const InputDecoration(
-                          label: Text('E-mail'),
-                        ),
-                        maxLines: 1,
-                        onFieldSubmitted: (value) => loginAtendimento(),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                      width: 10,
-                    ),
-                    ElevatedButton(
-                      onPressed: () => loginAtendimento(),
-                      child: const Text('Acessar Area de Atendimento'),
-                    ),
-                  ],
-                ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey.withOpacity(.5),
+                width: 1,
               ),
             ),
+            height: 620,
+            width: MediaQuery.of(context).size.width,
+            child: LayoutBuilder(
+              builder: (p0, p1) {
+                return StreamBuilder(
+                  stream: ticketController.streamProcessosAll(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: SelectableText(snapshot.error.toString()),
+                      );
+                    } else if (snapshot.hasData) {
+                      return montaSLA(
+                        snapshot.data!,
+                        //  showAppBar: false,
+                      );
+                    } else {
+                      return const Center(
+                        child: SelectableText('Não há dados.'),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
           ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey.withOpacity(.5),
+                width: 1,
+              ),
+            ),
+            height: 600,
+            width: MediaQuery.of(context).size.width,
+            child: LayoutBuilder(
+              builder: (ctx, contraints) {
+                return StreamBuilder(
+                  stream: ticketController.streamProcessosAll(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: SelectableText(snapshot.error.toString()),
+                      );
+                    } else if (snapshot.hasData) {
+                      return SingleChildScrollView(
+                        child: Wrap(
+                          children: [
+                            SizedBox(
+                              width: 600,
+                              child: GrfQntPorSetor(
+                                tickets: snapshot.data!,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 600,
+                              child: GrfPorUsuario(
+                                tickets: snapshot.data!,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 400,
+                              child: GrfSatisfacaoGeral(
+                                tickets: snapshot.data!,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 400,
+                              child: GrfMovimentados(
+                                tickets: snapshot.data!,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return const Center(
+                        child: SelectableText('Não há dados.'),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+          // Container(
+          //   padding: const EdgeInsets.all(10),
+          //   margin: const EdgeInsets.all(10),
+          //   decoration: BoxDecoration(
+          //     border: Border.all(
+          //       color: Colors.grey.withOpacity(.5),
+          //       width: 1,
+          //     ),
+          //   ),
+          //   height: 300,
+          //   width: MediaQuery.of(context).size.width,
+          //   child: StreamBuilder(
+          //     stream: ticketController.streamProcessosAll(),
+          //     builder: (context, snapshot) {
+          //       if (snapshot.connectionState == ConnectionState.waiting) {
+          //         return const Center(
+          //           child: CircularProgressIndicator(),
+          //         );
+          //       } else if (snapshot.hasError) {
+          //         return Center(
+          //           child: SelectableText(snapshot.error.toString()),
+          //         );
+          //       } else if (snapshot.hasData) {
+          //         return Wrap(
+          //           children: [
+          //             SizedBox(
+          //               child: GrfPorUsuario(
+          //                 tickets: snapshot.data!,
+          //               ),
+          //             ),
+          //           ],
+          //         );
+          //       } else {
+          //         return const Center(
+          //           child: SelectableText('Não há dados.'),
+          //         );
+          //       }
+          //     },
+          //   ),
+          // )
         ],
+      ),
+    );
+  }
+
+//
+  void login() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return const LoginDialog();
+      },
+    );
+  }
+}
+
+class LoginDialog extends StatefulWidget {
+  const LoginDialog({Key? key}) : super(key: key);
+
+  @override
+  State<LoginDialog> createState() => _LoginDialogState();
+}
+
+class _LoginDialogState extends State<LoginDialog> {
+  TextEditingController txtEmailController = TextEditingController(
+    text: 'ronaldo@gmail.com',
+  );
+
+  HomePageController controller = HomePageController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: SizedBox(
+        height: 200,
+        width: 400,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 20,
+                width: 10,
+              ),
+              SizedBox(
+                width: 400,
+                child: TextFormField(
+                  controller: txtEmailController,
+                  decoration: const InputDecoration(
+                    label: Text('E-mail'),
+                  ),
+                  maxLines: 1,
+                  onFieldSubmitted: (value) => loginAtendimento(),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+                width: 10,
+              ),
+              ElevatedButton(
+                onPressed: () => loginAtendimento(),
+                child: const Text('Acessar Area de Atendimento'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -144,7 +338,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           //   message: 'Bem-Vindo ${usr.nome}',
           //   title: ':)',
           // );
-
+          txtEmailController.clear();
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -163,8 +357,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 }
-
-
 
 /*
 TODO ANOTAÇÕES

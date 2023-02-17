@@ -52,6 +52,19 @@ class _AgenteViewState extends State<AgenteView> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: FilterChip(
+                avatar: const Icon(Icons.search),
+                showCheckmark: false,
+                label: const Text(
+                  'Pesquisa de Tickets',
+                  overflow: TextOverflow.visible,
+                  textAlign: TextAlign.center,
+                ),
+                onSelected: (value) {},
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FilterChip(
                 avatar: const Icon(Icons.add),
                 showCheckmark: false,
                 label: const Text(
@@ -223,8 +236,8 @@ class _AgenteViewState extends State<AgenteView> {
                                         },
                                       ),
                                       Text(
-                                        '- ${DateFormat("dd/MM/yyy hh:mm:ss").format(ticket.abertura)}'
-                                        ' ${(ticket.encerrado == null) ? '' : 'até ${DateFormat("dd/MM/yyy hh:mm:ss").format(ticket.encerrado!)}'}',
+                                        '- ${DateFormat("dd/MM/yyy HH:mm:ss").format(ticket.abertura)}'
+                                        ' ${(ticket.encerrado == null) ? '' : 'até ${DateFormat("dd/MM/yyy HH:mm:ss").format(ticket.encerrado!)}'}',
                                       ),
                                       Text(
                                         '- ${ticket.status}',

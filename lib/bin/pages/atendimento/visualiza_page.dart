@@ -1,4 +1,4 @@
-import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:selecaosicoob/bin/model/usuario_model.dart';
@@ -57,7 +57,9 @@ class _VisualizaTicketState extends State<VisualizaTicket> {
               child: LinearProgressIndicator(),
             );
           } else if (snapshot.hasError) {
-            print(snapshot.error);
+            if (kDebugMode) {
+              print(snapshot.error);
+            }
             return SizedBox(
               width: size.width / 2,
               child: SelectableText('Erro ao buscar!\r\n${snapshot.error}'),

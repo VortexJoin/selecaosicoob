@@ -1,9 +1,12 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:selecaosicoob/bin/model/usuario_model.dart';
+import 'package:selecaosicoob/bin/pages/agente/agente_controller.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
 
 import '../../model/setor_model.dart';
+import '../../model/ticket_model.dart';
 
 class NovoAtendimento extends StatefulWidget {
   final Usuario usuarioAbertura;
@@ -17,10 +20,17 @@ class NovoAtendimento extends StatefulWidget {
 }
 
 class _NovoAtendimentoState extends State<NovoAtendimento> {
+  late AgenteController agenteController;
   TextEditingController txtAssunto = TextEditingController();
   TextEditingController txtConteudo = TextEditingController();
   Setor? setorSelecionado;
   String urgencia = 'Baixa';
+
+  @override
+  void initState() {
+    agenteController = AgenteController(usuario: widget.usuarioAbertura);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +60,8 @@ class _NovoAtendimentoState extends State<NovoAtendimento> {
               ),
               TextFormField(
                 controller: txtConteudo,
+                minLines: 2,
+                maxLines: 5,
                 decoration: const InputDecoration(
                   labelText: 'Conteudo',
                 ),
@@ -59,10 +71,9 @@ class _NovoAtendimentoState extends State<NovoAtendimento> {
               ),
               DropdownSearch<Setor>(
                 asyncItems: (String filter) async {
-                  SetorController setorController = SetorController();
-                  await setorController.getData();
+                  await agenteController.setorController.getData();
 
-                  return setorController.listaSetor;
+                  return agenteController.setorController.listaSetor;
                 },
                 itemAsString: (Setor u) => u.descricao,
                 onChanged: (Setor? data) {
@@ -109,11 +120,39 @@ class _NovoAtendimentoState extends State<NovoAtendimento> {
         ),
         ElevatedButton(
           onPressed: () {
-            ProgressDialog pd = ProgressDialog(context: context);
-            pd.show(msg: 'Carregando...');
+            if (validaCampos().isEmpty) {
+              ProgressDialog pd = ProgressDialog(context: context);
+              pd.show(msg: 'Carregando...');
 
-            pd.close();
-            Navigator.pop(context);
+              try {
+                Ticket tmpTicket = Ticket(
+                  assunto: txtAssunto.text,
+                  conteudo: txtConteudo.text,
+                  usuarioabertura: widget.usuarioAbertura.codigo,
+                  abertura: DateTime.now(),
+                  ultimamovimentacao: DateTime.now(),
+                  setorinicial: setorSelecionado!.codigo,
+                  setoratual: setorSelecionado!.codigo,
+                  urgencia: urgencia,
+                );
+                agenteController.ticketController.setdata(tmpTicket);
+                Navigator.pop(context);
+                pd.close();
+              } catch (e) {
+                pd.close();
+                showOkAlertDialog(
+                  context: context,
+                  message: 'Erro na solicitação\r\n$e',
+                  title: 'Atenção',
+                );
+              }
+            } else {
+              showOkAlertDialog(
+                context: context,
+                message: validaCampos(),
+                title: 'Atenção',
+              );
+            }
           },
           child: const SizedBox(
             width: 100,
@@ -141,6 +180,10 @@ class _NovoAtendimentoState extends State<NovoAtendimento> {
 
     if (setorSelecionado == null) {
       retorno = 'Selecione o Setor';
+    }
+
+    if (urgencia.isEmpty) {
+      retorno = 'Informe a Urgencia';
     }
 
     return retorno;

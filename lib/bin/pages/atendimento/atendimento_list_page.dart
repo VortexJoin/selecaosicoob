@@ -229,8 +229,10 @@ class _ViewAtendimentoPageState extends State<ViewAtendimentoPage> {
                       SlaStatistics slaStatistics = SlaStatistics(calculators);
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) =>
-                              SlaStatisticsScreen(slaStatistics: slaStatistics),
+                          builder: (context) => SlaStatisticsScreen(
+                            slaStatistics: slaStatistics,
+                            ticketToDownload: controller.dados,
+                          ),
                         ),
                       );
                     },

@@ -117,11 +117,7 @@ class UsuarioController extends ChangeNotifier {
               .toList();
         });
       } else {
-        await firestoreService
-            .getCollection()
-            .orderBy(_orderField)
-            .get()
-            .then((snapshot) {
+        await firestoreService.getCollection().get().then((snapshot) {
           _dados = snapshot.docs
               .map((e) => Usuario.fromJson(e.data() as Map<String, dynamic>))
               .toList();

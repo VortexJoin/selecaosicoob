@@ -31,7 +31,7 @@ class Ticket {
     required this.ultimamovimentacao,
     required this.setorinicial,
     required this.setoratual,
-    required this.tipo,
+    this.tipo = 'Chamado',
     required this.urgencia,
     this.status = "Aberto",
     this.mensagem = const [],
@@ -131,23 +131,27 @@ class Avaliacao {
 }
 
 class Mensagem {
-  Mensagem({
-    required this.datamensagem,
-    required this.usuario,
-    required this.uid,
-    required this.conteudo,
-  });
+  Mensagem(
+      {required this.datamensagem,
+      required this.usuario,
+      required this.uid,
+      required this.conteudo,
+      this.movimentacaoSetor = false});
 
   DateTime datamensagem;
   String usuario;
   String uid;
   String conteudo;
+  bool movimentacaoSetor;
 
   factory Mensagem.fromJson(Map<String, dynamic> json) => Mensagem(
         datamensagem: DateTime.parse(json["datamensagem"]),
         usuario: json["usuario"],
         uid: json["uid"],
         conteudo: json["conteudo"],
+        movimentacaoSetor: (json["movimentacaoSetor"] == null)
+            ? false
+            : json["movimentacaoSetor"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -155,6 +159,7 @@ class Mensagem {
         "usuario": usuario,
         "uid": uid,
         "conteudo": conteudo,
+        "movimentacaoSetor": movimentacaoSetor,
       };
 }
 
@@ -265,6 +270,11 @@ class TicketController extends ChangeNotifier {
   CollectionReference getCollection() {
     return firestoreService.getCollection();
   }
+
+  Stream<List<Ticket>> streamProcessosAll() =>
+      getCollection().snapshots().map((x) => x.docs
+          .map((doc) => Ticket.fromJson(doc.data() as Map<String, dynamic>))
+          .toList());
 
   Future<bool> setdata(Ticket ticket, {bool refreshData = false}) async {
     // ESSE METODO SERVE TANTO PARA INSERIR QUANTO PARA EDITAR
