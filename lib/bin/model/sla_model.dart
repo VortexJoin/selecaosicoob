@@ -1,12 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:selecaosicoob/bin/model/ticket_model.dart';
-import 'package:selecaosicoob/bin/services/export_data.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import '../pages/home_page/graficos/cumprir_sla.dart';
 
-Widget montaSLA(List<Ticket> data, {bool showAppBar = true}) {
+Widget montaSLA(List<Ticket> data,
+    {bool showAppBar = true, bool showScrolView = true}) {
   List<SlaCalculator> slaCalc = data
       .where((tk) => tk.encerrado != null && tk.inicioAtendimento != null)
       .map(
@@ -23,6 +22,7 @@ Widget montaSLA(List<Ticket> data, {bool showAppBar = true}) {
     slaStatistics: slaStatistics,
     showSLA: showAppBar,
     ticketToDownload: data,
+    showScrolView: showScrolView,
   );
 }
 
@@ -136,16 +136,17 @@ class SlaStatistics {
   }
 }
 
-class _ChartData {
+class ChartData {
   final String label;
   final int value;
 
-  _ChartData(this.label, this.value);
+  ChartData(this.label, this.value);
 }
 
 class SlaStatisticsScreen extends StatefulWidget {
   final SlaStatistics slaStatistics;
   final bool showSLA;
+  final bool showScrolView;
   final SlaParams? slaParams;
   final List<Ticket> ticketToDownload;
 
@@ -154,7 +155,8 @@ class SlaStatisticsScreen extends StatefulWidget {
       required this.slaStatistics,
       this.showSLA = true,
       this.slaParams,
-      required this.ticketToDownload})
+      required this.ticketToDownload,
+      this.showScrolView = true})
       : super(key: key);
 
   @override
@@ -181,140 +183,46 @@ class SlaStatisticsScreenState extends State<SlaStatisticsScreen> {
               title: const Text('SLA'),
             )
           : null,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: (widget.showScrolView)
+          ? SingleChildScrollView(child: body())
+          : body(),
+    );
+  }
+
+  Widget body() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextoAnaliseStatistica(tickets: widget.ticketToDownload),
+        Wrap(
+          alignment: WrapAlignment.spaceAround,
           children: [
-            const SizedBox(
-              height: 10,
+            SizedBox(
+              width: 400,
+              height: 400,
+              child: CumprirSLA(tickets: widget.ticketToDownload),
             ),
             SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Text(
-                'Porcentagem de sucesso do tempo de resposta: ${widget.slaStatistics.porcentagemTempoResposta.toStringAsFixed(2)}%',
-                textAlign: TextAlign.center,
-              ),
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Text(
-                'Porcentagem de sucesso do tempo de atendimento: ${widget.slaStatistics.porcentagemTempoAtendimento.toStringAsFixed(2)}%',
-                textAlign: TextAlign.center,
-              ),
+              width: 400,
+              height: 400,
+              child: GrfCumprirSLAColumn(tickets: widget.ticketToDownload),
             ),
             const SizedBox(
               height: 30,
+              width: 30,
             ),
-            Wrap(
-              children: [
-                SizedBox(
-                  width: 400,
-                  child: SfCircularChart(
-                    tooltipBehavior: TooltipBehavior(
-                      enable: true,
-                      tooltipPosition: TooltipPosition.pointer,
-                    ),
-                    series: <CircularSeries>[
-                      PieSeries<_ChartData, String>(
-                        dataSource: [
-                          _ChartData(
-                              'Cumpriram SLA',
-                              widget.slaStatistics.calculators
-                                  .where((c) => c.cumpriuSla)
-                                  .length),
-                          _ChartData(
-                              'Não cumpriram SLA',
-                              widget.slaStatistics.calculators
-                                  .where((c) => !c.cumpriuSla)
-                                  .length),
-                        ],
-                        xValueMapper: (_ChartData data, _) => data.label,
-                        yValueMapper: (_ChartData data, _) => data.value,
-                        dataLabelSettings:
-                            const DataLabelSettings(isVisible: true),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 400,
-                  child: SfCartesianChart(
-                    primaryXAxis: CategoryAxis(),
-                    tooltipBehavior: TooltipBehavior(
-                      enable: true,
-                      tooltipPosition: TooltipPosition.pointer,
-                    ),
-                    series: <ChartSeries>[
-                      ColumnSeries<_ChartData, String>(
-                        dataSource: [
-                          _ChartData(
-                              'Cumpriram SLA',
-                              widget.slaStatistics.calculators
-                                  .where((c) => c.cumpriuSla)
-                                  .length),
-                          _ChartData(
-                              'Não cumpriram SLA',
-                              widget.slaStatistics.calculators
-                                  .where((c) => !c.cumpriuSla)
-                                  .length),
-                        ],
-                        name: 'SLA',
-                        xValueMapper: (_ChartData data, _) => data.label,
-                        yValueMapper: (_ChartData data, _) => data.value,
-                        dataLabelSettings:
-                            const DataLabelSettings(isVisible: true),
-                      )
-                    ],
-                  ),
-                ),
-              ],
+            TextInfoSLAParam(
+              slaParams: slaParams,
+              ticketsParaDownload: widget.ticketToDownload,
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Regras do SLA :\r\n'
-                        '-Inicio do Atendimento : ${slaParams.atendimentoInicio} hrs\r\n'
-                        '-Fim do Atendimento : ${slaParams.atendimentoFim} hrs\r\n'
-                        '-Tempo Maximo de Solução : ${slaParams.tempoMaximoResolucao} hrs\r\n'
-                        '-Tempo Maximo de Resposta ${slaParams.tempoMinimoResposta} hrs\r\n',
-                        textAlign: TextAlign.start,
-                      ),
-                    ),
-                  ),
-                  OutlinedButton(
-                    onPressed: () =>
-                        ExportData().downloadExcel(widget.ticketToDownload),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        FaIcon(
-                          FontAwesomeIcons.fileExcel,
-                          color: Colors.green,
-                        ),
-                        Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                          child: Text('Download Excel'),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            )
           ],
         ),
-      ),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
     );
   }
 }

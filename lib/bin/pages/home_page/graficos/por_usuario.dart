@@ -85,12 +85,13 @@ class _GrfPorUsuarioState extends State<GrfPorUsuario> {
             position: LegendPosition.top,
             toggleSeriesVisibility: true,
           ),
+          title: ChartTitle(text: 'Chamados em Atendimento'),
           series: <ChartSeries<QntPorChave, String>>[
             ColumnSeries(
               dataSource: qntPorChave.value,
               xValueMapper: (QntPorChave item, _) => item.chave,
               yValueMapper: (QntPorChave item, _) => item.quantidade,
-              name: 'Atendimentos Por Usuario',
+              name: 'Por Usuario',
               borderRadius: BorderRadius.all(
                 Radius.circular(radiusColumn),
               ),
@@ -112,7 +113,7 @@ class _GrfPorUsuarioState extends State<GrfPorUsuario> {
               ],
               xValueMapper: (QntPorChave item, _) => item.chave,
               yValueMapper: (QntPorChave item, _) => item.quantidade,
-              name: 'Total de Atendimentos',
+              name: 'Total',
               borderRadius: BorderRadius.all(
                 Radius.circular(radiusColumn),
               ),

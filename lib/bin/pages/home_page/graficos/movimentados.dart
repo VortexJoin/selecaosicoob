@@ -44,7 +44,7 @@ class _GrfMovimentadosState extends State<GrfMovimentados> {
         position: LegendPosition.top,
         toggleSeriesVisibility: true,
       ),
-      title: ChartTitle(text: 'Atendimentos movimentados entre setores'),
+      title: ChartTitle(text: 'Atendimentos com Tramites'),
       series: <CircularSeries>[
         PieSeries<_ChartData, String>(
           dataSource: [

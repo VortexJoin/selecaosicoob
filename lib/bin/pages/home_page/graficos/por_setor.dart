@@ -84,12 +84,13 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
             position: LegendPosition.top,
             toggleSeriesVisibility: true,
           ),
+          title: ChartTitle(text: 'Chamados em Atendimento'),
           series: <ChartSeries<QntPorChave, String>>[
             ColumnSeries(
               dataSource: qntPorChave.value,
               xValueMapper: (QntPorChave item, _) => item.chave,
               yValueMapper: (QntPorChave item, _) => item.quantidade,
-              name: 'Atendimentos Por Setor',
+              name: 'Por Setor',
               borderRadius: BorderRadius.all(
                 Radius.circular(radiusColumn),
               ),
@@ -107,7 +108,7 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
               ],
               xValueMapper: (QntPorChave item, _) => item.chave,
               yValueMapper: (QntPorChave item, _) => item.quantidade,
-              name: 'Total de Atendimentos',
+              name: 'Total',
               borderRadius: BorderRadius.all(
                 Radius.circular(radiusColumn),
               ),

@@ -1,6 +1,4 @@
-# selecaosicoob
-
-#Projeto Utilizado na Seleção do SICOOB Cacoal
+# Projeto Utilizado na Seleção do SICOOB Cacoal
 
 Desenvolver uma central de atendimento de chamados que centralize os atendimentos de 10 áreas administrativas, que serão atendidos por pessoas diferentes e com tempos distintos, onde cada informação deve ser segregada para aquela área em específico, todavia, deve haver a possibilidade de encaminhar o atendimento entre as áreas;
 

@@ -7,12 +7,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:selecaosicoob/bin/pages/home_page/home_page.dart';
 import 'package:selecaosicoob/firebase_options.dart';
 
+import 'bin/model/color_schema_app.dart';
 import 'bin/model/project_info_model.dart';
 
 final getIt = GetIt.instance;
 
 void main() async {
   getIt.registerSingleton<ProjectInfo>(ProjectInfo(nome: 'Seleção SICOOB'));
+  getIt.registerSingleton<CorPadraoTema>(CorPadraoTema());
+
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -37,7 +40,13 @@ class MyApp extends StatelessWidget {
         Locale('pt', 'BR'),
       ],
       theme: FlexThemeData.light(
-        scheme: FlexScheme.deepBlue,
+        //scheme: FlexScheme.green,
+        colors: FlexSchemeColor(
+          primary: getIt<CorPadraoTema>().primaria,
+          secondary: getIt<CorPadraoTema>().secundaria,
+          tertiary: getIt<CorPadraoTema>().terciaria,
+          error: Colors.red,
+        ),
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
         blendLevel: 9,
         subThemesData: const FlexSubThemesData(
@@ -51,7 +60,12 @@ class MyApp extends StatelessWidget {
         fontFamily: GoogleFonts.notoSans().fontFamily,
       ),
       darkTheme: FlexThemeData.dark(
-        scheme: FlexScheme.deepBlue,
+        //scheme: FlexScheme.green,
+        colors: const FlexSchemeColor(
+          primary: Color.fromRGBO(0, 160, 145, 1),
+          secondary: Color.fromRGBO(0, 54, 65, 1),
+          error: Colors.red,
+        ),
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
         blendLevel: 15,
         subThemesData: const FlexSubThemesData(

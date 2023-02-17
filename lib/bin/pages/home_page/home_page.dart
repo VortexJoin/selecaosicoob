@@ -12,11 +12,11 @@ import 'package:selecaosicoob/bin/pages/home_page/home_page_controller.dart';
 import 'package:selecaosicoob/bin/pages/setor/setor_list_page.dart';
 import 'package:selecaosicoob/bin/pages/usuario/usuario_list_page.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../model/project_info_model.dart';
 import '../agente/agente_page.dart';
+import 'graficos/cumprir_sla.dart';
 import 'graficos/movimentados.dart';
 import 'graficos/por_setor.dart';
 import 'graficos/por_usuario.dart';
@@ -47,7 +47,6 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-
     _myStream = ticketController.streamProcessosAll();
   }
 
@@ -119,7 +118,7 @@ class _HomePageState extends State<HomePage>
                 width: 1,
               ),
             ),
-            height: 620,
+            //height: 620,
             width: MediaQuery.of(context).size.width,
             child: LayoutBuilder(
               builder: (p0, p1) {
@@ -127,82 +126,91 @@ class _HomePageState extends State<HomePage>
                   stream: _myStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else if (snapshot.hasError) {
                       return Center(
-                        child: SelectableText(snapshot.error.toString()),
-                      );
-                    } else if (snapshot.hasData) {
-                      return montaSLA(snapshot.data!, showAppBar: false
-                          //  showAppBar: false,
-                          );
-                    } else {
-                      return const Center(
-                        child: SelectableText('Não há dados.'),
-                      );
-                    }
-                  },
-                );
-              },
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(10),
-            margin: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey.withOpacity(.5),
-                width: 1,
-              ),
-            ),
-            height: 600,
-            width: MediaQuery.of(context).size.width,
-            child: LayoutBuilder(
-              builder: (ctx, contraints) {
-                return StreamBuilder(
-                  stream: _myStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: SelectableText(snapshot.error.toString()),
-                      );
-                    } else if (snapshot.hasData) {
-                      return SingleChildScrollView(
-                        child: Wrap(
-                          children: [
-                            SizedBox(
-                              width: 600,
-                              child: GrfQntPorSetor(
-                                tickets: snapshot.data!,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 600,
-                              child: GrfPorUsuario(
-                                tickets: snapshot.data!,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 400,
-                              child: GrfSatisfacaoGeral(
-                                tickets: snapshot.data!,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 400,
-                              child: GrfMovimentados(
-                                tickets: snapshot.data!,
-                              ),
-                            ),
-                          ],
+                        child: GestureDetector(
+                          onDoubleTap: () {
+                            _myStream = ticketController.streamProcessosAll();
+                            setState(() {});
+                            print('Reseting stream');
+                          },
+                          child: const CircularProgressIndicator(),
                         ),
                       );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: SelectableText(snapshot.error.toString()),
+                      );
+                    } else if (snapshot.hasData) {
+                      return Column(
+                        children: [
+                          TextoAnaliseStatistica(
+                            tickets: snapshot.data!,
+                          ),
+                          Wrap(
+                            alignment: WrapAlignment.spaceAround,
+                            children: [
+                              SizedBox(
+                                width: 400,
+                                height: 400,
+                                child: CumprirSLA(
+                                  tickets: snapshot.data!,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 400,
+                                height: 400,
+                                child: GrfCumprirSLAColumn(
+                                  tickets: snapshot.data!,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 30,
+                                width: 30,
+                              ),
+                              TextInfoSLAParam(
+                                slaParams: SlaParams(),
+                                ticketsParaDownload: snapshot.data!,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Wrap(
+                            alignment: WrapAlignment.spaceAround,
+                            children: [
+                              SizedBox(
+                                width: 400,
+                                height: 300,
+                                child: GrfQntPorSetor(
+                                  tickets: snapshot.data!,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 400,
+                                height: 300,
+                                child: GrfPorUsuario(
+                                  tickets: snapshot.data!,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 300,
+                                height: 300,
+                                child: GrfSatisfacaoGeral(
+                                  tickets: snapshot.data!,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 300,
+                                height: 300,
+                                child: GrfMovimentados(
+                                  tickets: snapshot.data!,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
                     } else {
                       return const Center(
                         child: SelectableText('Não há dados.'),
@@ -213,6 +221,7 @@ class _HomePageState extends State<HomePage>
               },
             ),
           ),
+
           // Container(
           //   padding: const EdgeInsets.all(10),
           //   margin: const EdgeInsets.all(10),
