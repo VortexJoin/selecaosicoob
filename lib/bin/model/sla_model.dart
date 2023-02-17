@@ -272,42 +272,45 @@ class SlaStatisticsScreenState extends State<SlaStatisticsScreen> {
             const SizedBox(
               height: 10,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Regras do SLA :\r\n'
-                      '-Inicio do Atendimento : ${slaParams.atendimentoInicio} hrs\r\n'
-                      '-Fim do Atendimento : ${slaParams.atendimentoFim} hrs\r\n'
-                      '-Tempo Maximo de Solução : ${slaParams.tempoMaximoResolucao} hrs\r\n'
-                      '-Tempo Maximo de Resposta ${slaParams.tempoMinimoResposta} hrs\r\n',
-                      textAlign: TextAlign.start,
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Regras do SLA :\r\n'
+                        '-Inicio do Atendimento : ${slaParams.atendimentoInicio} hrs\r\n'
+                        '-Fim do Atendimento : ${slaParams.atendimentoFim} hrs\r\n'
+                        '-Tempo Maximo de Solução : ${slaParams.tempoMaximoResolucao} hrs\r\n'
+                        '-Tempo Maximo de Resposta ${slaParams.tempoMinimoResposta} hrs\r\n',
+                        textAlign: TextAlign.start,
+                      ),
                     ),
                   ),
-                ),
-                OutlinedButton(
-                  onPressed: () =>
-                      ExportData().downloadExcel(widget.ticketToDownload),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      FaIcon(
-                        FontAwesomeIcons.fileExcel,
-                        color: Colors.green,
-                      ),
-                      Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                        child: Text('Download Excel'),
-                      )
-                    ],
-                  ),
-                )
-              ],
+                  OutlinedButton(
+                    onPressed: () =>
+                        ExportData().downloadExcel(widget.ticketToDownload),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        FaIcon(
+                          FontAwesomeIcons.fileExcel,
+                          color: Colors.green,
+                        ),
+                        Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                          child: Text('Download Excel'),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
             )
           ],
         ),

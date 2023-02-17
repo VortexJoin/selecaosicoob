@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+import 'dart:async';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
@@ -27,22 +29,29 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin<HomePage> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
-
   @override
   bool get wantKeepAlive => true;
+
   TicketController ticketController = TicketController();
+
+  //  final StreamController<List<Ticket>> readingStreamController =
+  //   StreamController<List<Ticket>>();
+
+  // Stream<List<Ticket>> get onStreamChange =>
+  //     ticketController.streamProcessosAll();
+
+  late Stream<List<Ticket>> _myStream;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _myStream = ticketController.streamProcessosAll();
+  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    // ignore: unused_local_variable
-    var size = MediaQuery.of(context).size;
-    // ignore: unused_local_variable
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(GetIt.instance<ProjectInfo>().nome),
@@ -113,7 +122,7 @@ class _HomePageState extends State<HomePage>
             child: LayoutBuilder(
               builder: (p0, p1) {
                 return StreamBuilder(
-                  stream: ticketController.streamProcessosAll(),
+                  stream: _myStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -124,10 +133,9 @@ class _HomePageState extends State<HomePage>
                         child: SelectableText(snapshot.error.toString()),
                       );
                     } else if (snapshot.hasData) {
-                      return montaSLA(
-                        snapshot.data!,
-                        //  showAppBar: false,
-                      );
+                      return montaSLA(snapshot.data!, showAppBar: false
+                          //  showAppBar: false,
+                          );
                     } else {
                       return const Center(
                         child: SelectableText('Não há dados.'),
@@ -152,7 +160,7 @@ class _HomePageState extends State<HomePage>
             child: LayoutBuilder(
               builder: (ctx, contraints) {
                 return StreamBuilder(
-                  stream: ticketController.streamProcessosAll(),
+                  stream: _myStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
