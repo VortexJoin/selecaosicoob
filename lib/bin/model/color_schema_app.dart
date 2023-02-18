@@ -10,6 +10,8 @@ class CorPadraoTema {
     this.secundaria = const Color.fromRGBO(0, 54, 65, 1),
     this.terciaria = const Color.fromRGBO(125, 182, 28, 1),
   });
+
+  List<Color> get allColors => <Color>[primaria, secundaria, terciaria];
 }
 
 

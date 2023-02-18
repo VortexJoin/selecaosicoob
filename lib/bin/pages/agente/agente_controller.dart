@@ -159,10 +159,16 @@ class AgenteController extends ChangeNotifier {
       return streamGetMeusAtendimentosConcluidos();
     } else if (_selectedFilter == 'atendimento') {
       return streamGetMeusAtendimentosIniciados();
+    } else if (_selectedFilter == 'meuschamadosabertos') {
+      return streamMeusChamadosAbertos();
+    } else if (_selectedFilter == 'meuschamadosconcluidos') {
+      return streamMeusChamadosConcluidos();
     } else {
       return streamMeusProcessosAll();
     }
   }
+
+  /// cliente@gmail.com
 
   Widget ticketOption({
     required Ticket data,
@@ -603,9 +609,28 @@ class AgenteController extends ChangeNotifier {
 
   Stream<List<Ticket>> streamAtendimentosPendentesNoSetor() => ticketController
       .getCollection()
-      .where("setoratual", whereIn: usuario.setores)
+      .where("setoratual",
+          whereIn: (usuario.setores.isNotEmpty) ? usuario.setores : [''])
       .where("status", isEqualTo: 'Aberto')
       .where("responsavelatual", isNull: true)
+      .snapshots()
+      .map((x) => x.docs
+          .map((doc) => Ticket.fromJson(doc.data() as Map<String, dynamic>))
+          .toList());
+
+  Stream<List<Ticket>> streamMeusChamadosAbertos() => ticketController
+      .getCollection()
+      .where("usuarioabertura", isEqualTo: usuario.codigo)
+      .where("status", isNotEqualTo: 'Concluido')
+      .snapshots()
+      .map((x) => x.docs
+          .map((doc) => Ticket.fromJson(doc.data() as Map<String, dynamic>))
+          .toList());
+
+  Stream<List<Ticket>> streamMeusChamadosConcluidos() => ticketController
+      .getCollection()
+      .where("usuarioabertura", isEqualTo: usuario.codigo)
+      .where("status", isEqualTo: 'Concluido')
       .snapshots()
       .map((x) => x.docs
           .map((doc) => Ticket.fromJson(doc.data() as Map<String, dynamic>))

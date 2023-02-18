@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../../../../main.dart';
+import '../../../model/color_schema_app.dart';
 import '../../../model/setor_model.dart';
 import '../../../model/sla_model.dart';
 import '../../../model/ticket_model.dart';
@@ -20,7 +22,7 @@ class GrfQntPorSetor extends StatefulWidget {
 }
 
 class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
-  double radiusColumn = 5;
+  double radiusColumn = 3;
   double widthColumn = .6;
   double spacingColumn = .3;
   SetorController setorController = SetorController();
@@ -84,9 +86,10 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
             position: LegendPosition.top,
             toggleSeriesVisibility: true,
           ),
+          palette: getIt<CorPadraoTema>().allColors,
           title: ChartTitle(text: 'Chamados em Atendimento'),
           series: <ChartSeries<QntPorChave, String>>[
-            ColumnSeries(
+            BarSeries(
               dataSource: qntPorChave.value,
               xValueMapper: (QntPorChave item, _) => item.chave,
               yValueMapper: (QntPorChave item, _) => item.quantidade,
@@ -98,11 +101,11 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
                 isVisible: true,
                 showZeroValue: true,
               ),
-              width: widthColumn,
+              // width: widthColumn,
               spacing: spacingColumn,
               animationDuration: 800,
             ),
-            ColumnSeries(
+            BarSeries(
               dataSource: [
                 QntPorChave(quantidade: widget.tickets.length, chave: 'Total')
               ],
@@ -112,12 +115,12 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
               borderRadius: BorderRadius.all(
                 Radius.circular(radiusColumn),
               ),
-              color: Colors.green,
+              color: getIt<CorPadraoTema>().terciaria,
               dataLabelSettings: const DataLabelSettings(
                 isVisible: true,
                 showZeroValue: true,
               ),
-              width: widthColumn,
+              //width: widthColumn,
               spacing: spacingColumn,
               animationDuration: 800,
             ),

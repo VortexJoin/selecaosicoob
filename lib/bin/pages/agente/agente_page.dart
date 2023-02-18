@@ -23,6 +23,10 @@ class _AgenteViewState extends State<AgenteView> {
   @override
   void initState() {
     agenteController = AgenteController(usuario: widget.usuario);
+
+    if (widget.usuario.tipo.toLowerCase() != 'agente') {
+      agenteController.setFilter('meuschamados');
+    }
     super.initState();
   }
 
@@ -94,98 +98,169 @@ class _AgenteViewState extends State<AgenteView> {
                   spacing: 10,
                   runSpacing: 10,
                   children: [
-                    FilterChip(
-                      avatar: const Icon(Icons.schedule),
-                      showCheckmark: false,
-                      label: StreamBuilder(
-                        stream: agenteController
-                            .streamAtendimentosPendentesNoSetor(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox(
-                              width: 50,
-                              //  height: 10,
-                              child: LinearProgressIndicator(),
+                    Visibility(
+                      visible: (widget.usuario.tipo.toLowerCase() != 'agente'),
+                      child: FilterChip(
+                        avatar: const Icon(Icons.schedule),
+                        showCheckmark: false,
+                        label: StreamBuilder(
+                          stream: agenteController.streamMeusChamadosAbertos(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox(
+                                width: 50,
+                                //  height: 10,
+                                child: LinearProgressIndicator(),
+                              );
+                            }
+                            return Text(
+                              'Meus Chamados Abertos (${snapshot.data!.length})',
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.visible,
                             );
-                          }
-                          return Text(
-                            'a Receber (${snapshot.data!.length})',
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.visible,
-                          );
+                          },
+                        ),
+                        onSelected: (value) {
+                          agenteController.setFilter('meuschamadosabertos');
                         },
+                        selected: (agenteController.selectedFilter ==
+                            'meuschamadosabertos'),
                       ),
-                      onSelected: (value) {
-                        agenteController.setFilter('aberto');
-                      },
-                      selected: (agenteController.selectedFilter == 'aberto'),
                     ),
-                    FilterChip(
-                      avatar: const Icon(Icons.history),
-                      showCheckmark: false,
-                      label: StreamBuilder(
-                        stream: agenteController
-                            .streamGetMeusAtendimentosIniciados(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox(
-                              width: 50,
-                              // height: 10,
-                              child: LinearProgressIndicator(),
+                    Visibility(
+                      visible: (widget.usuario.tipo.toLowerCase() != 'agente'),
+                      child: FilterChip(
+                        avatar: const Icon(Icons.schedule),
+                        showCheckmark: false,
+                        label: StreamBuilder(
+                          stream:
+                              agenteController.streamMeusChamadosConcluidos(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox(
+                                width: 50,
+                                //  height: 10,
+                                child: LinearProgressIndicator(),
+                              );
+                            }
+                            return Text(
+                              'Meus Chamados Concluidos (${snapshot.data!.length})',
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.visible,
                             );
-                          }
-                          return Text(
-                            'em Atendimento (${snapshot.data!.length})',
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.visible,
-                          );
+                          },
+                        ),
+                        onSelected: (value) {
+                          agenteController.setFilter('meuschamadosconcluidos');
                         },
+                        selected: (agenteController.selectedFilter ==
+                            'meuschamadosconcluidos'),
                       ),
-                      onSelected: (value) {
-                        agenteController.setFilter('atendimento');
-                      },
-                      selected:
-                          (agenteController.selectedFilter == 'atendimento'),
                     ),
-                    FilterChip(
-                      avatar: const Icon(Icons.task_alt),
-                      showCheckmark: false,
-                      label: StreamBuilder(
-                        stream: agenteController
-                            .streamGetMeusAtendimentosConcluidos(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox(
-                              width: 50,
-                              //  height: 10,
-                              child: LinearProgressIndicator(),
+                    Visibility(
+                      visible: (widget.usuario.tipo.toLowerCase() == 'agente'),
+                      child: FilterChip(
+                        avatar: const Icon(Icons.schedule),
+                        showCheckmark: false,
+                        label: StreamBuilder(
+                          stream: agenteController
+                              .streamAtendimentosPendentesNoSetor(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox(
+                                width: 50,
+                                //  height: 10,
+                                child: LinearProgressIndicator(),
+                              );
+                            }
+                            return Text(
+                              'a Receber (${snapshot.data!.length})',
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.visible,
                             );
-                          }
-                          return Text(
-                            'Concluidos (${snapshot.data!.length})',
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.visible,
-                          );
+                          },
+                        ),
+                        onSelected: (value) {
+                          agenteController.setFilter('aberto');
                         },
+                        selected: (agenteController.selectedFilter == 'aberto'),
                       ),
-                      onSelected: (value) {
-                        agenteController.setFilter('concluido');
-                      },
-                      selected:
-                          (agenteController.selectedFilter == 'concluido'),
                     ),
-                    FilterChip(
-                      avatar: const Icon(Icons.auto_graph_outlined),
-                      showCheckmark: false,
-                      label: const Text(
-                        'Relatorios SLA',
-                        overflow: TextOverflow.visible,
-                        textAlign: TextAlign.center,
+                    Visibility(
+                      visible: (widget.usuario.tipo.toLowerCase() == 'agente'),
+                      child: FilterChip(
+                        avatar: const Icon(Icons.history),
+                        showCheckmark: false,
+                        label: StreamBuilder(
+                          stream: agenteController
+                              .streamGetMeusAtendimentosIniciados(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox(
+                                width: 50,
+                                // height: 10,
+                                child: LinearProgressIndicator(),
+                              );
+                            }
+                            return Text(
+                              'em Atendimento (${snapshot.data!.length})',
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.visible,
+                            );
+                          },
+                        ),
+                        onSelected: (value) {
+                          agenteController.setFilter('atendimento');
+                        },
+                        selected:
+                            (agenteController.selectedFilter == 'atendimento'),
                       ),
-                      onSelected: (value) {
-                        agenteController.setFilter('sla');
-                      },
-                      selected: (agenteController.selectedFilter == 'sla'),
+                    ),
+                    Visibility(
+                      visible: (widget.usuario.tipo.toLowerCase() == 'agente'),
+                      child: FilterChip(
+                        avatar: const Icon(Icons.task_alt),
+                        showCheckmark: false,
+                        label: StreamBuilder(
+                          stream: agenteController
+                              .streamGetMeusAtendimentosConcluidos(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox(
+                                width: 50,
+                                //  height: 10,
+                                child: LinearProgressIndicator(),
+                              );
+                            }
+                            return Text(
+                              'Concluidos (${snapshot.data!.length})',
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.visible,
+                            );
+                          },
+                        ),
+                        onSelected: (value) {
+                          agenteController.setFilter('concluido');
+                        },
+                        selected:
+                            (agenteController.selectedFilter == 'concluido'),
+                      ),
+                    ),
+                    Visibility(
+                      visible: (widget.usuario.tipo.toLowerCase() == 'agente'),
+                      child: FilterChip(
+                        avatar: const Icon(Icons.auto_graph_outlined),
+                        showCheckmark: false,
+                        label: const Text(
+                          'Relatorios SLA',
+                          overflow: TextOverflow.visible,
+                          textAlign: TextAlign.center,
+                        ),
+                        onSelected: (value) {
+                          agenteController.setFilter('sla');
+                        },
+                        selected: (agenteController.selectedFilter == 'sla'),
+                      ),
                     ),
                   ],
                 );

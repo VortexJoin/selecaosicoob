@@ -5,9 +5,9 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:selecaosicoob/bin/model/sla_model.dart';
 import 'package:selecaosicoob/bin/model/ticket_model.dart';
-import 'package:selecaosicoob/bin/pages/atendimento/atendimento_list_page.dart';
 import 'package:selecaosicoob/bin/pages/home_page/home_page_controller.dart';
 import 'package:selecaosicoob/bin/pages/setor/setor_list_page.dart';
 import 'package:selecaosicoob/bin/pages/usuario/usuario_list_page.dart';
@@ -18,9 +18,11 @@ import '../../model/project_info_model.dart';
 import '../agente/agente_page.dart';
 import 'graficos/cumprir_sla.dart';
 import 'graficos/movimentados.dart';
+import 'graficos/por_assunto.dart';
 import 'graficos/por_setor.dart';
 import 'graficos/por_usuario.dart';
 import 'graficos/satisfacao_geral.dart';
+import 'graficos/ultimos_dias.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -48,6 +50,10 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     _myStream = ticketController.streamProcessosAll();
+  }
+
+  Future<PackageInfo> getPackageInfo() async {
+    return await PackageInfo.fromPlatform();
   }
 
   @override
@@ -93,17 +99,17 @@ class _HomePageState extends State<HomePage>
                 );
               },
             ),
-            ListTile(
-              title: const Text('Atendimentos'),
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ViewAtendimentoPage(),
-                  ),
-                );
-              },
-            ),
+            // ListTile(
+            //   title: const Text('Atendimentos'),
+            //   onTap: () async {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const ViewAtendimentoPage(),
+            //       ),
+            //     );
+            //   },
+            // ),
           ],
         ),
       ),
@@ -194,6 +200,28 @@ class _HomePageState extends State<HomePage>
                                 ),
                               ),
                               SizedBox(
+                                width: 400,
+                                height: 300,
+                                child: GrfQntPorAssunto(
+                                  tickets: snapshot.data!,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 400,
+                                height: 300,
+                                child: GrfQntPorDia(
+                                  tickets: snapshot.data!,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Wrap(
+                            alignment: WrapAlignment.spaceAround,
+                            children: [
+                              SizedBox(
                                 width: 300,
                                 height: 300,
                                 child: GrfSatisfacaoGeral(
@@ -272,7 +300,7 @@ class _HomePageState extends State<HomePage>
                 width: 1,
               ),
             ),
-            height: 200,
+            // height: 200,
             child: Column(
               children: [
                 const SizedBox(
@@ -291,6 +319,21 @@ class _HomePageState extends State<HomePage>
                   },
                   child: const SelectableText(
                       'GitHub: https://github.com/ronaldojr1804/selecaosicoob'),
+                ),
+                FutureBuilder(
+                  future: getPackageInfo(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: SelectableText(
+                          'Versão Atual : ${snapshot.data!.version} ${snapshot.data!.buildNumber} ${snapshot.data!.buildSignature}',
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
                 )
               ],
             ),

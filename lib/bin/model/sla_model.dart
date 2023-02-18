@@ -41,8 +41,8 @@ class SlaParams {
 }
 
 class SlaCalculator {
-  bool cumpriuSla =
-      false; // propriedade para indicar se o chamado cumpriu o SLA
+  // propriedade para indicar se o chamado cumpriu o SLA
+  bool cumpriuSla = false;
   DateTime inicioChamado;
   final DateTime terminoChamado;
   final DateTime primeiraMensagem;
@@ -62,11 +62,11 @@ class SlaCalculator {
     // Verifica se o horário de início do chamado está dentro do horário de atendimento
     if (inicioChamado.hour < slaParams!.atendimentoInicio ||
         inicioChamado.hour >= slaParams!.atendimentoFim) {
-      print('O chamado foi iniciado fora do horário de atendimento.');
+      //print('O chamado foi iniciado fora do horário de atendimento.');
       if (slaParams!.consideraInicioForaExpediente) {
-        print(
-          'O chamado foi iniciado para o proximo dia no primeiro horario de atendimento',
-        );
+        // print(
+        //   'O chamado foi iniciado para o proximo dia no primeiro horario de atendimento',
+        // );
         inicioChamado = DateTime(inicioChamado.year, inicioChamado.month,
                 inicioChamado.day, slaParams!.atendimentoInicio, 0, 0, 0, 0)
             .add(const Duration(days: 1));
@@ -90,7 +90,7 @@ class SlaCalculator {
 
     // Verifica se a duração do chamado está dentro do tempo máximo de resolução
     if (duracaoChamado > slaParams!.tempoMaximoResolucao) {
-      print('O chamado excedeu o tempo máximo de resolução.');
+      //print('O chamado excedeu o tempo máximo de resolução.');
       return;
     }
 
@@ -98,14 +98,14 @@ class SlaCalculator {
     if (tempoResposta < slaParams!.tempoMinimoResposta) {
       // Se a duração do chamado está dentro do tempo máximo de resolução, o SLA é considerado cumprido
       if (duracaoChamado <= slaParams!.tempoMaximoResolucao) {
-        print('O SLA foi cumprido com sucesso.');
+        // print('O SLA foi cumprido com sucesso.');
         cumpriuSla = true;
       } else {
-        print(
-            'O tempo de resposta foi inferior ao tempo mínimo esperado e o chamado excedeu o tempo máximo de resolução.');
+        // print(
+        //     'O tempo de resposta foi inferior ao tempo mínimo esperado e o chamado excedeu o tempo máximo de resolução.');
       }
     } else {
-      print('O SLA foi cumprido com sucesso.');
+      //print('O SLA foi cumprido com sucesso.');
       cumpriuSla = true;
     }
   }
@@ -129,10 +129,10 @@ class SlaStatistics {
     porcentagemTempoResposta = (cumpriramSla / totalChamados) * 100;
     porcentagemTempoAtendimento = (1 - (porcentagemTempoResposta / 100)) * 100;
 
-    print(
-        'Porcentagem de sucesso do tempo de resposta: $porcentagemTempoResposta%');
-    print(
-        'Porcentagem de sucesso do tempo de atendimento: $porcentagemTempoAtendimento%');
+    // print(
+    //     'Porcentagem de sucesso do tempo de resposta: $porcentagemTempoResposta%');
+    // print(
+    //     'Porcentagem de sucesso do tempo de atendimento: $porcentagemTempoAtendimento%');
   }
 }
 

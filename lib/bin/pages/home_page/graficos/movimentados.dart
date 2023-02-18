@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../../../../main.dart';
+import '../../../model/color_schema_app.dart';
 import '../../../model/ticket_model.dart';
 
 class GrfMovimentados extends StatefulWidget {
@@ -44,6 +46,7 @@ class _GrfMovimentadosState extends State<GrfMovimentados> {
         position: LegendPosition.top,
         toggleSeriesVisibility: true,
       ),
+      palette: getIt<CorPadraoTema>().allColors,
       title: ChartTitle(text: 'Atendimentos com Tramites'),
       series: <CircularSeries>[
         PieSeries<_ChartData, String>(

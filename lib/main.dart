@@ -61,9 +61,10 @@ class MyApp extends StatelessWidget {
       ),
       darkTheme: FlexThemeData.dark(
         //scheme: FlexScheme.green,
-        colors: const FlexSchemeColor(
-          primary: Color.fromRGBO(0, 160, 145, 1),
-          secondary: Color.fromRGBO(0, 54, 65, 1),
+        colors: FlexSchemeColor(
+          primary: getIt<CorPadraoTema>().primaria,
+          secondary: getIt<CorPadraoTema>().secundaria,
+          tertiary: getIt<CorPadraoTema>().terciaria,
           error: Colors.red,
         ),
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,

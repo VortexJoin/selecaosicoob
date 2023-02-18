@@ -85,6 +85,9 @@ class Ticket {
             : Avaliacao.fromJson(json["avaliacao"]),
       );
 
+
+      
+
   Map<String, dynamic> toJson() => {
         "codigo": codigo,
         "uid": uid,

@@ -1,58 +1,78 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:selecaosicoob/bin/model/usuario_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../../../main.dart';
 import '../../../model/color_schema_app.dart';
+import '../../../model/setor_model.dart';
 import '../../../model/sla_model.dart';
 import '../../../model/ticket_model.dart';
+import '../../../services/utils_func.dart';
 
-class GrfPorUsuario extends StatefulWidget {
+class GrfQntPorDia extends StatefulWidget {
   final List<Ticket> tickets;
-  const GrfPorUsuario({super.key, required this.tickets});
+  final int qntDias;
+
+  const GrfQntPorDia({
+    super.key,
+    required this.tickets,
+    this.qntDias = 7,
+  });
 
   @override
-  State<GrfPorUsuario> createState() => _GrfPorUsuarioState();
+  State<GrfQntPorDia> createState() => _GrfQntPorSetorState();
 }
 
-class _GrfPorUsuarioState extends State<GrfPorUsuario> {
-  double radiusColumn = 5;
+class _GrfQntPorSetorState extends State<GrfQntPorDia> {
+  double radiusColumn = 3;
   double widthColumn = .6;
   double spacingColumn = .3;
-  UsuarioController usuarioController = UsuarioController();
+
+  SetorController setorController = SetorController();
   ValueNotifier<List<QntPorChave>> qntPorChave = ValueNotifier([]);
 
   Future<List<QntPorChave>> getChartData(List<Ticket> tickets) async {
+    DateTime dataFinal = DateTime.now().add(const Duration(days: 1));
+    DateTime dataInicial =
+        dataFinal.subtract(Duration(days: widget.qntDias + 1));
+
+    List<Ticket> tmpTicket = tickets
+        .where((ticket) =>
+            ticket.abertura.isAfter(dataInicial) &&
+            ticket.abertura.isBefore(dataFinal))
+        .toList();
+
+    qntTickets = tmpTicket.length;
+    tmpTicket.sort((a, b) => a.abertura.compareTo(b.abertura));
+
     Map<String, int> data = {};
-    for (var ticket in tickets.where((x) => x.responsavelatual != null)) {
-      if (!data.containsKey(ticket.responsavelatual!)) {
-        data[ticket.responsavelatual!] = 1;
+    for (var ticket in tmpTicket) {
+      if (!data.containsKey(Utils.formatDatedmy(ticket.abertura))) {
+        data[Utils.formatDatedmy(ticket.abertura)] = 1;
       } else {
-        data[ticket.responsavelatual!] = data[ticket.responsavelatual!]! + 1;
+        data[Utils.formatDatedmy(ticket.abertura)] =
+            data[Utils.formatDatedmy(ticket.abertura)]! + 1;
       }
     }
 
     List<QntPorChave> res = data.entries
-        .map((entry) => QntPorChave(chave: entry.key, quantidade: entry.value))
+        .map((entry) => QntPorChave(
+            chave: Utils.capitalize(entry.key), quantidade: entry.value))
         .toList();
 
-    for (var re in res) {
-      await usuarioController.getByCodigo(re.chave).then((value) {
-        if (value != null) {
-          re.chave = value.nome;
-        } else {
-          if (kDebugMode) {
-            print('${re.chave} == USUARIO NÃO ENCONTRADO');
-          }
-        }
-      });
-    }
+    // for (var re in res) {
+    //   await setorController.getByCodigo(re.chave).then((value) {
+    //     if (value != null) {
+    //       re.chave = value.descricao;
+    //     }
+    //   });
+    // }
 
     return res;
   }
+
+  int qntTickets = 0;
 
   @override
   void initState() {
@@ -88,13 +108,13 @@ class _GrfPorUsuarioState extends State<GrfPorUsuario> {
             toggleSeriesVisibility: true,
           ),
           palette: getIt<CorPadraoTema>().allColors,
-          title: ChartTitle(text: 'Chamados em Atendimento'),
+          title: ChartTitle(text: 'Chamados Por Dia (${widget.qntDias} dias)'),
           series: <ChartSeries<QntPorChave, String>>[
             BarSeries(
               dataSource: qntPorChave.value,
               xValueMapper: (QntPorChave item, _) => item.chave,
               yValueMapper: (QntPorChave item, _) => item.quantidade,
-              name: 'Por Usuario',
+              name: 'Chamados',
               borderRadius: BorderRadius.all(
                 Radius.circular(radiusColumn),
               ),
@@ -102,30 +122,24 @@ class _GrfPorUsuarioState extends State<GrfPorUsuario> {
                 isVisible: true,
                 showZeroValue: true,
               ),
-              width: widthColumn,
+              // width: widthColumn,
               spacing: spacingColumn,
               animationDuration: 800,
             ),
             BarSeries(
-              dataSource: [
-                QntPorChave(
-                    quantidade: widget.tickets
-                        .where((x) => x.responsavelatual != null)
-                        .length,
-                    chave: 'Total')
-              ],
+              dataSource: [QntPorChave(quantidade: qntTickets, chave: 'Total')],
               xValueMapper: (QntPorChave item, _) => item.chave,
               yValueMapper: (QntPorChave item, _) => item.quantidade,
               name: 'Total',
               borderRadius: BorderRadius.all(
                 Radius.circular(radiusColumn),
               ),
-              color: getIt<CorPadraoTema>().terciaria,
               dataLabelSettings: const DataLabelSettings(
                 isVisible: true,
                 showZeroValue: true,
               ),
-              width: widthColumn,
+              color: getIt<CorPadraoTema>().terciaria,
+              // width: widthColumn,
               spacing: spacingColumn,
               animationDuration: 800,
             ),

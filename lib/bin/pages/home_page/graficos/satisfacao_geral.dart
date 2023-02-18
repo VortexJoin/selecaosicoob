@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import '../../../../main.dart';
+import '../../../model/color_schema_app.dart';
 import '../../../model/ticket_model.dart';
 
 class GrfSatisfacaoGeral extends StatefulWidget {
@@ -28,36 +30,37 @@ class _GrfSatisfacaoGeralState extends State<GrfSatisfacaoGeral> {
         position: LegendPosition.top,
         toggleSeriesVisibility: true,
       ),
-      title: ChartTitle(text: 'Avaliações dos Atendimentos'),
+      palette: getIt<CorPadraoTema>().allColors,
+      title: ChartTitle(text: 'Avaliações (Notas)'),
       series: <CircularSeries>[
         PieSeries<_ChartData, String>(
           dataSource: [
             _ChartData(
-                'Nota 1',
+                '1',
                 widget.tickets
                     .where((x) => x.avaliacao != null)
                     .where((y) => y.avaliacao!.nota == 1)
                     .length),
             _ChartData(
-                'Nota 2',
+                '2',
                 widget.tickets
                     .where((x) => x.avaliacao != null)
                     .where((y) => y.avaliacao!.nota == 2)
                     .length),
             _ChartData(
-                'Nota 3',
+                '3',
                 widget.tickets
                     .where((x) => x.avaliacao != null)
                     .where((y) => y.avaliacao!.nota == 3)
                     .length),
             _ChartData(
-                'Nota 4',
+                '4',
                 widget.tickets
                     .where((x) => x.avaliacao != null)
                     .where((y) => y.avaliacao!.nota == 4)
                     .length),
             _ChartData(
-                'Nota 5',
+                '5',
                 widget.tickets
                     .where((x) => x.avaliacao != null)
                     .where((y) => y.avaliacao!.nota == 5)

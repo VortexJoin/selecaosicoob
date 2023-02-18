@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../../../../main.dart';
+import '../../../model/color_schema_app.dart';
 import '../../../model/sla_model.dart';
 import '../../../model/ticket_model.dart';
 import '../../../services/export_data.dart';
@@ -22,6 +24,7 @@ class _CumprirSLAState extends State<CumprirSLA> {
         enable: true,
         tooltipPosition: TooltipPosition.pointer,
       ),
+      palette: getIt<CorPadraoTema>().allColors,
       series: <CircularSeries>[
         PieSeries<ChartData, String>(
           dataSource: [
@@ -72,6 +75,10 @@ class GrfCumprirSLAColumn extends StatefulWidget {
 }
 
 class _GrfCumprirSLAColumnState extends State<GrfCumprirSLAColumn> {
+  double radiusColumn = 3;
+  double widthColumn = .6;
+  double spacingColumn = .3;
+
   @override
   Widget build(BuildContext context) {
     return SfCartesianChart(
@@ -80,6 +87,7 @@ class _GrfCumprirSLAColumnState extends State<GrfCumprirSLAColumn> {
         enable: true,
         tooltipPosition: TooltipPosition.pointer,
       ),
+      palette: getIt<CorPadraoTema>().allColors,
       series: <ChartSeries>[
         ColumnSeries<ChartData, String>(
           dataSource: [
@@ -89,6 +97,19 @@ class _GrfCumprirSLAColumnState extends State<GrfCumprirSLAColumn> {
                     .calculators
                     .where((c) => c.cumpriuSla)
                     .length),
+          ],
+          name: 'SLA',
+          xValueMapper: (ChartData data, _) => data.label,
+          yValueMapper: (ChartData data, _) => data.value,
+          dataLabelSettings: const DataLabelSettings(isVisible: true),
+          borderRadius: BorderRadius.all(
+            Radius.circular(radiusColumn),
+          ),
+          width: widthColumn,
+          spacing: spacingColumn,
+        ),
+        ColumnSeries<ChartData, String>(
+          dataSource: [
             ChartData(
                 'Não cumpriram SLA',
                 processData(widget.tickets)
@@ -100,7 +121,12 @@ class _GrfCumprirSLAColumnState extends State<GrfCumprirSLAColumn> {
           xValueMapper: (ChartData data, _) => data.label,
           yValueMapper: (ChartData data, _) => data.value,
           dataLabelSettings: const DataLabelSettings(isVisible: true),
-        )
+          borderRadius: BorderRadius.all(
+            Radius.circular(radiusColumn),
+          ),
+          width: widthColumn,
+          spacing: spacingColumn,
+        ),
       ],
     );
   }
@@ -131,7 +157,7 @@ class _TextoAnaliseStatisticaState extends State<TextoAnaliseStatistica> {
         ),
         SizedBox(
           width: MediaQuery.of(context).size.width,
-          height: 30,
+          // height: 30,
           child: Text(
             'Porcentagem de sucesso do tempo de resposta: ${processData(widget.tickets).porcentagemTempoResposta.toStringAsFixed(2)}%',
             textAlign: TextAlign.center,
@@ -139,7 +165,7 @@ class _TextoAnaliseStatisticaState extends State<TextoAnaliseStatistica> {
         ),
         SizedBox(
           width: MediaQuery.of(context).size.width,
-          height: 30,
+          // height: 30,
           child: Text(
             'Porcentagem de sucesso do tempo de atendimento: ${processData(widget.tickets).porcentagemTempoAtendimento.toStringAsFixed(2)}%',
             textAlign: TextAlign.center,
