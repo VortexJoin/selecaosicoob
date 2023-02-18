@@ -1,0 +1,1 @@
+xcopy .\build\web\*.* .\public /E /H /C /I /Y
