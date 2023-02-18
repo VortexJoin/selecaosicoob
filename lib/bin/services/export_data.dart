@@ -105,10 +105,10 @@ class ExportData {
           chamado.tempoAtendimento.difference(chamado.abertura);
 
       // TESTEEE
-      diferencaTempoAtendimento = Utils.diferencaEntreDatas(
-        chamado.abertura,
-        chamado.encerrado,
-      );
+      // diferencaTempoAtendimento = Utils.diferencaEntreDatas(
+      //   chamado.abertura,
+      //   chamado.encerrado,
+      // );
       sheet.getRangeByIndex(row, 1).setText(chamado.usuarioAtendimento);
       sheet.getRangeByIndex(row, 2).numberFormat = 'dd/mm/yyyy HH:mm:ss';
       sheet.getRangeByIndex(row, 2).setDateTime(chamado.abertura);
