@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 class Utils {
@@ -118,7 +119,9 @@ class DiffDate {
 
         // Verifica se a diferença passou para o próximo dia
         if (fimTrabalho.day != inicioTrabalho.day) {
-          print('diminui as horas');
+          if (kDebugMode) {
+            print('diminui as horas');
+          }
           // Adiciona a diferença de tempo trabalhado antes do fim do expediente
           diferencaDiaria = diferencaDiaria - const Duration(hours: 2);
         }

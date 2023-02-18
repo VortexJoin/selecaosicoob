@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:selecaosicoob/bin/services/utils_func.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart';
 import 'package:universal_html/html.dart';
@@ -96,7 +97,9 @@ class ExportData {
         [],
       );
 
-      print(diferencaTempoTotal);
+      if (kDebugMode) {
+        print(diferencaTempoTotal);
+      }
 
       var diferencaTempoAtendimento =
           chamado.tempoAtendimento.difference(chamado.abertura);
