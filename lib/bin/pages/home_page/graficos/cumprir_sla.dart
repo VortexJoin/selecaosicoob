@@ -5,6 +5,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import '../../../../main.dart';
 import '../../../model/color_schema_app.dart';
 import '../../../model/sla_model.dart';
+import '../../../model/sla_params.dart';
 import '../../../model/ticket_model.dart';
 import '../../../services/export_data.dart';
 
@@ -181,10 +182,8 @@ class _TextoAnaliseStatisticaState extends State<TextoAnaliseStatistica> {
 }
 
 class TextInfoSLAParam extends StatefulWidget {
-  final SlaParams slaParams;
   final List<Ticket> ticketsParaDownload;
-  const TextInfoSLAParam(
-      {super.key, required this.slaParams, required this.ticketsParaDownload});
+  const TextInfoSLAParam({super.key, required this.ticketsParaDownload});
 
   @override
   State<TextInfoSLAParam> createState() => _TextInfoSLAParamState();
@@ -202,10 +201,10 @@ class _TextInfoSLAParamState extends State<TextInfoSLAParam> {
         children: [
           Text(
             'Regras do SLA :\r\n'
-            '-Inicio do Atendimento : ${widget.slaParams.atendimentoInicio} hrs\r\n'
-            '-Fim do Atendimento : ${widget.slaParams.atendimentoFim} hrs\r\n'
-            '-Tempo Maximo de Solução : ${widget.slaParams.tempoMaximoResolucao} hrs\r\n'
-            '-Tempo Maximo de Resposta ${widget.slaParams.tempoMinimoResposta} hrs\r\n',
+            '-Inicio do Atendimento : ${getIt<SlaParams>().atendimentoInicio} hrs\r\n'
+            '-Fim do Atendimento : ${getIt<SlaParams>().atendimentoFim} hrs\r\n'
+            '-Tempo Maximo de Solução : ${getIt<SlaParams>().tempoMaximoResolucao} hrs\r\n'
+            '-Tempo Maximo de Resposta ${getIt<SlaParams>().tempoMinimoResposta} hrs\r\n',
             textAlign: TextAlign.start,
           ),
           Padding(

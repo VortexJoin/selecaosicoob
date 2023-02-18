@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
+import '../../main.dart';
+import '../model/sla_params.dart';
+
 class Utils {
   static String capitalize(String subject, [bool lowerRest = false]) {
     if (subject.isEmpty) {
@@ -47,9 +50,11 @@ class Utils {
 
     if (data2.weekday == 6 || data2.weekday == 7) {
       data2 = data2.subtract(Duration(days: (data2.weekday - 5)));
-      data2 = DateTime(data2.year, data2.month, data2.day, 17);
+      data2 = DateTime(data2.year, data2.month, data2.day,
+          getIt<SlaParams>().atendimentoFim);
     } else if (data2.hour >= 17) {
-      data2 = DateTime(data2.year, data2.month, data2.day, 17);
+      data2 = DateTime(data2.year, data2.month, data2.day,
+          getIt<SlaParams>().atendimentoFim);
     }
 
     // Calcular a diferença entre as datas
@@ -95,10 +100,10 @@ class DiffDate {
       if (dataAtual.weekday >= 1 &&
           dataAtual.weekday <= 5 &&
           !isFeriado(dataAtual, feriados)) {
-        DateTime inicioTrabalho =
-            DateTime(dataAtual.year, dataAtual.month, dataAtual.day, 8);
-        DateTime fimTrabalho =
-            DateTime(dataAtual.year, dataAtual.month, dataAtual.day, 17);
+        DateTime inicioTrabalho = DateTime(dataAtual.year, dataAtual.month,
+            dataAtual.day, getIt<SlaParams>().atendimentoInicio);
+        DateTime fimTrabalho = DateTime(dataAtual.year, dataAtual.month,
+            dataAtual.day, getIt<SlaParams>().atendimentoFim);
 
         // Verifica se o horário de início do trabalho é depois do horário inicial
         if (dataInicial.isAfter(fimTrabalho)) {
@@ -137,14 +142,3 @@ class DiffDate {
     return diferencaTotal;
   }
 }
-
-List<DateTime> feriadosPadrao = [
-  DateTime(DateTime.now().year, 1, 1), // Ano Novo
-  DateTime(DateTime.now().year, 4, 21), // Tiradentes
-  DateTime(DateTime.now().year, 5, 1), // Dia do Trabalho
-  DateTime(DateTime.now().year, 9, 7), // Independência
-  DateTime(DateTime.now().year, 10, 12), // Nossa Senhora Aparecida
-  DateTime(DateTime.now().year, 11, 2), // Finados
-  DateTime(DateTime.now().year, 11, 15), // Proclamação da República
-  DateTime(DateTime.now().year, 12, 25) // Natal
-];

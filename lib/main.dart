@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:selecaosicoob/bin/model/sla_params.dart';
 import 'package:selecaosicoob/bin/pages/home_page/home_page.dart';
 import 'package:selecaosicoob/firebase_options.dart';
 
@@ -15,6 +16,7 @@ final getIt = GetIt.instance;
 void main() async {
   getIt.registerSingleton<ProjectInfo>(ProjectInfo(nome: 'Seleção SICOOB'));
   getIt.registerSingleton<CorPadraoTema>(CorPadraoTema());
+  getIt.registerSingleton<SlaParams>(SlaParams());
 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

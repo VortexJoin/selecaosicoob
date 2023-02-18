@@ -419,14 +419,24 @@ class AgenteController extends ChangeNotifier {
         title: 'Atenção',
       );
     } else {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return NovoAtendimento(
-            usuarioAbertura: usuario,
-          );
-        },
-      );
+      DateTime dtNow = DateTime.now();
+
+      if (dtNow.hour >= 8 && dtNow.hour <= 17) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return NovoAtendimento(
+              usuarioAbertura: usuario,
+            );
+          },
+        );
+      } else {
+        showOkAlertDialog(
+          context: context,
+          message: 'Fora do horario de Atendimento',
+          title: 'Atenção',
+        );
+      }
     }
   }
 

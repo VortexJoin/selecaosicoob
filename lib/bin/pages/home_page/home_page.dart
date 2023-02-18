@@ -6,7 +6,6 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:selecaosicoob/bin/model/sla_model.dart';
 import 'package:selecaosicoob/bin/model/ticket_model.dart';
 import 'package:selecaosicoob/bin/pages/home_page/home_page_controller.dart';
 import 'package:selecaosicoob/bin/pages/setor/setor_list_page.dart';
@@ -174,7 +173,6 @@ class _HomePageState extends State<HomePage>
                                 width: 30,
                               ),
                               TextInfoSLAParam(
-                                slaParams: SlaParams(),
                                 ticketsParaDownload: snapshot.data!,
                               ),
                             ],

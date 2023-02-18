@@ -1,7 +1,9 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:selecaosicoob/bin/model/sla_params.dart';
 import 'package:selecaosicoob/bin/model/ticket_model.dart';
+import '../../main.dart';
 import '../pages/home_page/graficos/cumprir_sla.dart';
 
 Widget montaSLA(List<Ticket> data,
@@ -26,49 +28,34 @@ Widget montaSLA(List<Ticket> data,
   );
 }
 
-class SlaParams {
-  final int atendimentoInicio; // hora de início do atendimento
-  final int atendimentoFim; // hora de término do atendimento
-  final int tempoMinimoResposta; // tempo mínimo de resposta em horas
-  final int tempoMaximoResolucao; // tempo máximo de resolução em horas
-  final bool consideraInicioForaExpediente;
-  SlaParams(
-      {this.atendimentoInicio = 8,
-      this.atendimentoFim = 17,
-      this.tempoMinimoResposta = 2,
-      this.tempoMaximoResolucao = 8,
-      this.consideraInicioForaExpediente = true});
-}
-
 class SlaCalculator {
   // propriedade para indicar se o chamado cumpriu o SLA
   bool cumpriuSla = false;
   DateTime inicioChamado;
   final DateTime terminoChamado;
   final DateTime primeiraMensagem;
-  SlaParams? slaParams;
+  late SlaParams slaParams;
   SlaCalculator({
-    this.slaParams,
     required this.inicioChamado,
     required this.terminoChamado,
     required this.primeiraMensagem,
   }) {
-    slaParams ??= SlaParams();
+    slaParams = getIt<SlaParams>();
     calcularSla();
   }
 
   // Método para calcular o SLA de um atendimento
   void calcularSla() {
     // Verifica se o horário de início do chamado está dentro do horário de atendimento
-    if (inicioChamado.hour < slaParams!.atendimentoInicio ||
-        inicioChamado.hour >= slaParams!.atendimentoFim) {
+    if (inicioChamado.hour < slaParams.atendimentoInicio ||
+        inicioChamado.hour >= slaParams.atendimentoFim) {
       //print('O chamado foi iniciado fora do horário de atendimento.');
-      if (slaParams!.consideraInicioForaExpediente) {
+      if (slaParams.consideraInicioForaExpediente) {
         // print(
         //   'O chamado foi iniciado para o proximo dia no primeiro horario de atendimento',
         // );
         inicioChamado = DateTime(inicioChamado.year, inicioChamado.month,
-                inicioChamado.day, slaParams!.atendimentoInicio, 0, 0, 0, 0)
+                inicioChamado.day, slaParams.atendimentoInicio, 0, 0, 0, 0)
             .add(const Duration(days: 1));
       } else {
         return;
@@ -79,9 +66,9 @@ class SlaCalculator {
     var duracaoChamado = terminoChamado.difference(inicioChamado).inHours;
 
     // Verifica se o chamado ultrapassa o horário de atendimento
-    if (terminoChamado.hour >= slaParams!.atendimentoFim) {
+    if (terminoChamado.hour >= slaParams.atendimentoFim) {
       // Adiciona o número de horas do próximo dia até o final do horário de atendimento
-      duracaoChamado += (slaParams!.atendimentoFim - terminoChamado.hour) +
+      duracaoChamado += (slaParams.atendimentoFim - terminoChamado.hour) +
           (terminoChamado.day - inicioChamado.day - 1) * 24;
     }
 
@@ -89,15 +76,15 @@ class SlaCalculator {
     final tempoResposta = primeiraMensagem.difference(inicioChamado).inHours;
 
     // Verifica se a duração do chamado está dentro do tempo máximo de resolução
-    if (duracaoChamado > slaParams!.tempoMaximoResolucao) {
+    if (duracaoChamado > slaParams.tempoMaximoResolucao) {
       //print('O chamado excedeu o tempo máximo de resolução.');
       return;
     }
 
     // Verifica se o tempo de resposta está dentro do tempo mínimo de resposta
-    if (tempoResposta < slaParams!.tempoMinimoResposta) {
+    if (tempoResposta < slaParams.tempoMinimoResposta) {
       // Se a duração do chamado está dentro do tempo máximo de resolução, o SLA é considerado cumprido
-      if (duracaoChamado <= slaParams!.tempoMaximoResolucao) {
+      if (duracaoChamado <= slaParams.tempoMaximoResolucao) {
         // print('O SLA foi cumprido com sucesso.');
         cumpriuSla = true;
       } else {
@@ -214,7 +201,6 @@ class SlaStatisticsScreenState extends State<SlaStatisticsScreen> {
               width: 30,
             ),
             TextInfoSLAParam(
-              slaParams: slaParams,
               ticketsParaDownload: widget.ticketToDownload,
             ),
           ],
