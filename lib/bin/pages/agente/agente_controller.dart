@@ -92,12 +92,12 @@ class AgenteController extends ChangeNotifier {
       case 'atendimento':
         return Icon(
           Icons.work_history,
-          color: Theme.of(context).colorScheme.onSurface,
+          color: Theme.of(context).colorScheme.tertiary,
         );
 
       default:
         return Icon(
-          Icons.hourglass_empty,
+          Icons.hourglass_bottom,
           color: Theme.of(context).colorScheme.secondary,
         );
     }
@@ -173,6 +173,7 @@ class AgenteController extends ChangeNotifier {
   Widget ticketOption({
     required Ticket data,
     required BuildContext context,
+    bool showVisualiza = true,
   }) {
     return PopupMenuButton(
       onSelected: (value) async {
@@ -184,6 +185,7 @@ class AgenteController extends ChangeNotifier {
               builder: (context) => VisualizaTicket(
                 codTicket: data.codigo,
                 usuario: usuario,
+                filterOptions: _selectedFilter,
               ),
             ),
           );
@@ -244,23 +246,26 @@ class AgenteController extends ChangeNotifier {
       },
       itemBuilder: (context) {
         return [
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'visualizar',
-            child: Text("Visualizar"),
+            enabled: showVisualiza,
+            child: const Text("Visualizar"),
           ),
           PopupMenuItem(
             value: 'receber',
-            enabled: (onlyRead) ? false : _selectedFilter == 'aberto',
+            enabled: (onlyRead) ? false : data.status.toLowerCase() == 'aberto',
             child: const Text("Receber"),
           ),
           PopupMenuItem(
             value: 'tramitar',
-            enabled: (onlyRead) ? false : _selectedFilter == 'atendimento',
+            enabled:
+                (onlyRead) ? false : data.status.toLowerCase() == 'atendimento',
             child: const Text("Tramitar"),
           ),
           PopupMenuItem(
             value: 'finalizar',
-            enabled: (onlyRead) ? false : _selectedFilter == 'atendimento',
+            enabled:
+                (onlyRead) ? false : data.status.toLowerCase() == 'atendimento',
             child: const Text("Finalizar"),
           ),
         ];
@@ -481,6 +486,8 @@ class AgenteController extends ChangeNotifier {
                         decoration: const InputDecoration(
                           labelText: 'Conteudo',
                         ),
+                        minLines: 2,
+                        maxLines: 4,
                       ),
                       const Expanded(child: SizedBox()),
                       SizedBox(
@@ -594,11 +601,13 @@ class AgenteController extends ChangeNotifier {
                               datamensagem: DateTime.now(),
                               usuario: usuario.codigo,
                               uid: const Uuid().v4().split('-').first,
-                              conteudo: 'Movimentação de Setor',
+                              conteudo:
+                                  'Movimentação de Setor para : ${e.descricao}(${e.codigo})',
                               movimentacaoSetor: true,
                             ),
                           );
                           tmpTicket.responsavel = null;
+                          tmpTicket.responsavelatual = null;
                           tmpTicket.status = "Aberto";
                           tmpTicket.setoratual = e.codigo;
                           ticketController.setdata(tmpTicket);

@@ -34,7 +34,10 @@ class _HomePageState extends State<HomePage>
   @override
   bool get wantKeepAlive => true;
 
-  TicketController ticketController = TicketController();
+  TicketController ticketController = TicketController(
+    initialLoad: true,
+    showLoading: false,
+  );
 
   //  final StreamController<List<Ticket>> readingStreamController =
   //   StreamController<List<Ticket>>();
@@ -48,6 +51,19 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     _myStream = ticketController.streamProcessosAll();
+
+    getDataTimer();
+  }
+
+  getDataTimer() {
+    Timer.periodic(const Duration(seconds: 10), (timer) async {
+      //print('timer--${DateTime.now().toIso8601String()}');
+      getData();
+    });
+  }
+
+  getData() async {
+    await ticketController.getData();
   }
 
   @override
@@ -120,170 +136,127 @@ class _HomePageState extends State<HomePage>
             ),
             //height: 620,
             width: MediaQuery.of(context).size.width,
-            child: LayoutBuilder(
-              builder: (p0, p1) {
-                return StreamBuilder(
-                  stream: _myStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: GestureDetector(
-                          onDoubleTap: () {
-                            _myStream = ticketController.streamProcessosAll();
-                            setState(() {});
-                            print('Reseting stream');
-                          },
-                          child: const CircularProgressIndicator(),
-                        ),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: SelectableText(snapshot.error.toString()),
-                      );
-                    } else if (snapshot.hasData) {
-                      return Column(
+            child: AnimatedBuilder(
+              animation: ticketController,
+              builder: (context, child) {
+                if (ticketController.isLoading) {
+                  return Center(
+                    child: GestureDetector(
+                      onDoubleTap: () {
+                        _myStream = ticketController.streamProcessosAll();
+                        setState(() {});
+                        print('Reseting stream');
+                      },
+                      child: const CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (ticketController.hasError) {
+                  return Expanded(
+                    child: Center(
+                      child: Text(
+                          'Ops, Não conseguimos carregar os dados.\r\n${ticketController.error}'),
+                    ),
+                  );
+                } else if (ticketController.hasData) {
+                  return Column(
+                    children: [
+                      TextoAnaliseStatistica(
+                        tickets: ticketController.dados,
+                      ),
+                      Wrap(
+                        alignment: WrapAlignment.spaceAround,
                         children: [
-                          TextoAnaliseStatistica(
-                            tickets: snapshot.data!,
+                          SizedBox(
+                            width: 400,
+                            height: 400,
+                            child: CumprirSLA(
+                              tickets: ticketController.dados,
+                            ),
                           ),
-                          Wrap(
-                            alignment: WrapAlignment.spaceAround,
-                            children: [
-                              SizedBox(
-                                width: 400,
-                                height: 400,
-                                child: CumprirSLA(
-                                  tickets: snapshot.data!,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 400,
-                                height: 400,
-                                child: GrfCumprirSLAColumn(
-                                  tickets: snapshot.data!,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 30,
-                                width: 30,
-                              ),
-                              TextInfoSLAParam(
-                                ticketsParaDownload: snapshot.data!,
-                              ),
-                            ],
+                          SizedBox(
+                            width: 400,
+                            height: 400,
+                            child: GrfCumprirSLAColumn(
+                              tickets: ticketController.dados,
+                            ),
                           ),
                           const SizedBox(
-                            height: 10,
+                            height: 30,
+                            width: 30,
                           ),
-                          Wrap(
-                            alignment: WrapAlignment.spaceAround,
-                            children: [
-                              SizedBox(
-                                width: 400,
-                                height: 300,
-                                child: GrfQntPorSetor(
-                                  tickets: snapshot.data!,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 400,
-                                height: 300,
-                                child: GrfPorUsuario(
-                                  tickets: snapshot.data!,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 400,
-                                height: 300,
-                                child: GrfQntPorAssunto(
-                                  tickets: snapshot.data!,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 400,
-                                height: 300,
-                                child: GrfQntPorDia(
-                                  tickets: snapshot.data!,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Wrap(
-                            alignment: WrapAlignment.spaceAround,
-                            children: [
-                              SizedBox(
-                                width: 300,
-                                height: 300,
-                                child: GrfSatisfacaoGeral(
-                                  tickets: snapshot.data!,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 300,
-                                height: 300,
-                                child: GrfMovimentados(
-                                  tickets: snapshot.data!,
-                                ),
-                              ),
-                            ],
+                          TextInfoSLAParam(
+                            ticketsParaDownload: ticketController.dados,
                           ),
                         ],
-                      );
-                    } else {
-                      return const Center(
-                        child: SelectableText('Não há dados.'),
-                      );
-                    }
-                  },
-                );
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Wrap(
+                        alignment: WrapAlignment.spaceAround,
+                        children: [
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfQntPorSetor(
+                              tickets: ticketController.dados,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfPorUsuario(
+                              tickets: ticketController.dados,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfQntPorAssunto(
+                              tickets: ticketController.dados,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfQntPorDia(
+                              tickets: ticketController.dados,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Wrap(
+                        alignment: WrapAlignment.spaceAround,
+                        children: [
+                          SizedBox(
+                            width: 300,
+                            height: 300,
+                            child: GrfSatisfacaoGeral(
+                              tickets: ticketController.dados,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 300,
+                            height: 300,
+                            child: GrfMovimentados(
+                              tickets: ticketController.dados,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                } else {
+                  return const Center(
+                    child: SelectableText('Não há dados.'),
+                  );
+                }
               },
             ),
           ),
-
-          // Container(
-          //   padding: const EdgeInsets.all(10),
-          //   margin: const EdgeInsets.all(10),
-          //   decoration: BoxDecoration(
-          //     border: Border.all(
-          //       color: Colors.grey.withOpacity(.5),
-          //       width: 1,
-          //     ),
-          //   ),
-          //   height: 300,
-          //   width: MediaQuery.of(context).size.width,
-          //   child: StreamBuilder(
-          //     stream: ticketController.streamProcessosAll(),
-          //     builder: (context, snapshot) {
-          //       if (snapshot.connectionState == ConnectionState.waiting) {
-          //         return const Center(
-          //           child: CircularProgressIndicator(),
-          //         );
-          //       } else if (snapshot.hasError) {
-          //         return Center(
-          //           child: SelectableText(snapshot.error.toString()),
-          //         );
-          //       } else if (snapshot.hasData) {
-          //         return Wrap(
-          //           children: [
-          //             SizedBox(
-          //               child: GrfPorUsuario(
-          //                 tickets: snapshot.data!,
-          //               ),
-          //             ),
-          //           ],
-          //         );
-          //       } else {
-          //         return const Center(
-          //           child: SelectableText('Não há dados.'),
-          //         );
-          //       }
-          //     },
-          //   ),
-          // )
-
           Container(
             padding: const EdgeInsets.all(10),
             margin: const EdgeInsets.all(10),
@@ -301,7 +274,7 @@ class _HomePageState extends State<HomePage>
                   child: Text('Informações do Projeto'),
                 ),
                 GestureDetector(
-                  onDoubleTap: () async {
+                  onTap: () async {
                     const url =
                         'https://github.com/ronaldojr1804/selecaosicoob';
                     if (await canLaunchUrlString(url)) {
@@ -321,7 +294,142 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-//
+  Widget graficosStream() {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.grey.withOpacity(.5),
+          width: 1,
+        ),
+      ),
+      //height: 620,
+      width: MediaQuery.of(context).size.width,
+      child: LayoutBuilder(
+        builder: (p0, p1) {
+          return StreamBuilder(
+            stream: _myStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: GestureDetector(
+                    onDoubleTap: () {
+                      _myStream = ticketController.streamProcessosAll();
+                      setState(() {});
+                      print('Reseting stream');
+                    },
+                    child: const CircularProgressIndicator(),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: SelectableText(snapshot.error.toString()),
+                );
+              } else if (snapshot.hasData) {
+                return Column(
+                  children: [
+                    TextoAnaliseStatistica(
+                      tickets: snapshot.data!,
+                    ),
+                    Wrap(
+                      alignment: WrapAlignment.spaceAround,
+                      children: [
+                        SizedBox(
+                          width: 400,
+                          height: 400,
+                          child: CumprirSLA(
+                            tickets: snapshot.data!,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 400,
+                          height: 400,
+                          child: GrfCumprirSLAColumn(
+                            tickets: snapshot.data!,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 30,
+                          width: 30,
+                        ),
+                        TextInfoSLAParam(
+                          ticketsParaDownload: snapshot.data!,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Wrap(
+                      alignment: WrapAlignment.spaceAround,
+                      children: [
+                        SizedBox(
+                          width: 400,
+                          height: 300,
+                          child: GrfQntPorSetor(
+                            tickets: snapshot.data!,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 400,
+                          height: 300,
+                          child: GrfPorUsuario(
+                            tickets: snapshot.data!,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 400,
+                          height: 300,
+                          child: GrfQntPorAssunto(
+                            tickets: snapshot.data!,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 400,
+                          height: 300,
+                          child: GrfQntPorDia(
+                            tickets: snapshot.data!,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Wrap(
+                      alignment: WrapAlignment.spaceAround,
+                      children: [
+                        SizedBox(
+                          width: 300,
+                          height: 300,
+                          child: GrfSatisfacaoGeral(
+                            tickets: snapshot.data!,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 300,
+                          height: 300,
+                          child: GrfMovimentados(
+                            tickets: snapshot.data!,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              } else {
+                return const Center(
+                  child: SelectableText('Não há dados.'),
+                );
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+
   void login() {
     showDialog(
       context: context,

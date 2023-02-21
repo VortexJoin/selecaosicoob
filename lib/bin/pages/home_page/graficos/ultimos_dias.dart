@@ -84,9 +84,9 @@ class _GrfQntPorSetorState extends State<GrfQntPorDia> {
   startData() async {
     qntPorChave.value = await getChartData(widget.tickets);
 
-    Timer.periodic(const Duration(seconds: 5), (timer) async {
-      qntPorChave.value = await getChartData(widget.tickets);
-    });
+    // Timer.periodic(const Duration(seconds: 5), (timer) async {
+    //   qntPorChave.value = await getChartData(widget.tickets);
+    // });
   }
 
   @override

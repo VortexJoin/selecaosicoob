@@ -85,9 +85,6 @@ class Ticket {
             : Avaliacao.fromJson(json["avaliacao"]),
       );
 
-
-      
-
   Map<String, dynamic> toJson() => {
         "codigo": codigo,
         "uid": uid,
@@ -196,6 +193,7 @@ class Movimentacao {
 
 class TicketController extends ChangeNotifier {
   bool _isLoading = false;
+  bool _showLoading = true;
   String _hasError = '';
   String _orderField = 'abertura';
   final Uuid _uuid = const Uuid();
@@ -203,7 +201,8 @@ class TicketController extends ChangeNotifier {
 
   FirestoreService firestoreService = FirestoreService('atendimento');
 
-  TicketController({bool initialLoad = false}) {
+  TicketController({bool initialLoad = false, showLoading = true}) {
+    _showLoading = showLoading;
     if (initialLoad) {
       getData();
     }
@@ -222,8 +221,10 @@ class TicketController extends ChangeNotifier {
   }
 
   _setLoading() {
-    _isLoading = !_isLoading;
-    notifyListeners();
+    if (_showLoading) {
+      _isLoading = !_isLoading;
+      notifyListeners();
+    }
   }
 
   _setError(String error) {
@@ -278,6 +279,16 @@ class TicketController extends ChangeNotifier {
       getCollection().snapshots().map((x) => x.docs
           .map((doc) => Ticket.fromJson(doc.data() as Map<String, dynamic>))
           .toList());
+
+  Future<List<Ticket>> futureProcessosAll() async {
+    return await getCollection().get().then((snapshot) {
+      return _dados = snapshot.docs
+          .map((e) => Ticket.fromJson(e.data() as Map<String, dynamic>))
+          .toList();
+    }).then((value) {
+      return [];
+    });
+  }
 
   Future<bool> setdata(Ticket ticket, {bool refreshData = false}) async {
     // ESSE METODO SERVE TANTO PARA INSERIR QUANTO PARA EDITAR

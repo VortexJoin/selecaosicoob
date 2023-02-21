@@ -1,4 +1,6 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../main.dart';
@@ -16,6 +18,17 @@ class Utils {
       return subject[0].toUpperCase() + subject.substring(1);
     }
   }
+
+  static showOkAlert(
+    BuildContext context, {
+    required String msg,
+    required String title,
+  }) =>
+      showOkAlertDialog(
+        context: context,
+        message: msg,
+        title: title,
+      );
 
   static String formatDateymd(DateTime data) {
     DateFormat dateFormat = DateFormat('yyyy-MM-dd');

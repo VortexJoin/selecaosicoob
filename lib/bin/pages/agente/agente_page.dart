@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:selecaosicoob/bin/model/usuario_model.dart';
 import 'package:selecaosicoob/bin/pages/agente/agente_controller.dart';
+import 'package:selecaosicoob/bin/services/utils_func.dart';
 
 import '../../model/project_info_model.dart';
 import '../../model/ticket_model.dart';
@@ -28,6 +29,17 @@ class _AgenteViewState extends State<AgenteView> {
       agenteController.setFilter('meuschamados');
     }
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.usuario.setores.isEmpty) {
+        Utils.showOkAlert(
+          context,
+          msg:
+              'Não há setores definidos, portanto não há como receber novos atendimentos',
+          title: 'Atenção',
+        );
+      }
+    });
   }
 
   @override
@@ -291,56 +303,64 @@ class _AgenteViewState extends State<AgenteView> {
                               itemCount: snapshot.data!.length,
                               itemBuilder: (context, index) {
                                 Ticket ticket = snapshot.data![index];
-                                return ListTile(
-                                  title: Text(
-                                      '${ticket.assunto} - ${ticket.codigo}'),
-                                  subtitle: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      FutureBuilder<String>(
-                                        future: agenteController
-                                            .getUserCod(ticket.usuarioabertura),
-                                        builder: (context, snapshot) {
-                                          if (!snapshot.hasData) {
-                                            return const Text('- ');
-                                          } else {
-                                            return Text('- ${snapshot.data}');
-                                          }
-                                        },
-                                      ),
-                                      Text(
-                                        '- ${DateFormat("dd/MM/yyy HH:mm:ss").format(ticket.abertura)}'
-                                        ' ${(ticket.encerrado == null) ? '' : 'até ${DateFormat("dd/MM/yyy HH:mm:ss").format(ticket.encerrado!)}'}',
-                                      ),
-                                      Text(
-                                        '- ${ticket.status}',
-                                      ),
-                                      FutureBuilder<String>(
-                                        future: agenteController
-                                            .getSetorName(ticket.setoratual),
-                                        builder: (context, snapshot) {
-                                          if (!snapshot.hasData) {
-                                            return const Text('- ');
-                                          } else {
-                                            return Text('- ${snapshot.data}');
-                                          }
-                                        },
-                                      ),
-                                      Text(
-                                        '- ${ticket.urgencia}',
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () {},
-                                  leading: agenteController.getIconbyStatus(
-                                    context,
-                                    ticket.status,
-                                  ),
-                                  trailing: agenteController.ticketOption(
-                                    data: ticket,
-                                    context: context,
+                                bool changeColor = index % 2 == 0;
+
+                                return Container(
+                                  color: changeColor
+                                      ? Colors.grey.shade100
+                                      : Colors.grey.shade300,
+                                  child: ListTile(
+                                    title: Text(
+                                        '${ticket.assunto} - ${ticket.codigo}'),
+                                    subtitle: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        FutureBuilder<String>(
+                                          future: agenteController.getUserCod(
+                                              ticket.usuarioabertura),
+                                          builder: (context, snapshot) {
+                                            if (!snapshot.hasData) {
+                                              return const Text('- ');
+                                            } else {
+                                              return Text('- ${snapshot.data}');
+                                            }
+                                          },
+                                        ),
+                                        Text(
+                                          '- ${DateFormat("dd/MM/yyy HH:mm:ss").format(ticket.abertura)}'
+                                          ' ${(ticket.encerrado == null) ? '' : 'até ${DateFormat("dd/MM/yyy HH:mm:ss").format(ticket.encerrado!)}'}',
+                                        ),
+                                        Text(
+                                          '- ${ticket.status}',
+                                        ),
+                                        FutureBuilder<String>(
+                                          future: agenteController
+                                              .getSetorName(ticket.setoratual),
+                                          builder: (context, snapshot) {
+                                            if (!snapshot.hasData) {
+                                              return const Text('- ');
+                                            } else {
+                                              return Text('- ${snapshot.data}');
+                                            }
+                                          },
+                                        ),
+                                        Text(
+                                          '- ${ticket.urgencia}',
+                                        ),
+                                      ],
+                                    ),
+                                    onTap: () {},
+                                    leading: agenteController.getIconbyStatus(
+                                      context,
+                                      ticket.status,
+                                    ),
+                                    trailing: agenteController.ticketOption(
+                                      data: ticket,
+                                      context: context,
+                                    ),
                                   ),
                                 );
                               },

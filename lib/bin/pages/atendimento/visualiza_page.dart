@@ -10,11 +10,13 @@ class VisualizaTicket extends StatefulWidget {
   final String codTicket;
   final bool showappBar;
   final Usuario? usuario;
+  final String filterOptions;
   const VisualizaTicket({
     super.key,
     this.showappBar = true,
     required this.codTicket,
     this.usuario,
+    required this.filterOptions,
   });
 
   @override
@@ -31,10 +33,13 @@ class _VisualizaTicketState extends State<VisualizaTicket> {
       usuario: (widget.usuario == null)
           ? Usuario(nome: '', email: '', senha: '')
           : widget.usuario!,
+      onlyRead: (widget.usuario == null) ? true : false,
     );
 
     super.initState();
   }
+
+  ValueNotifier<Ticket?> localTicket = ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +50,32 @@ class _VisualizaTicketState extends State<VisualizaTicket> {
     return Scaffold(
       appBar: (widget.showappBar)
           ? AppBar(
-              title: Text('Atendimento - ${widget.codTicket}'),
+              actions: [
+                StreamBuilder<Ticket?>(
+                  stream: ticketController.streamByCod(widget.codTicket),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return agenteController.ticketOption(
+                        data: snapshot.data!,
+                        context: context,
+                        showVisualiza: false,
+                      );
+                    } else {
+                      return const SizedBox();
+                    }
+                  },
+                )
+              ],
+              title: Text(
+                'Atendimento - ${widget.codTicket}',
+              ),
             )
           : null,
       body: StreamBuilder<Ticket?>(
         stream: ticketController.streamByCod(widget.codTicket),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+            localTicket.value = null;
             return const SizedBox(
               width: 50,
               child: LinearProgressIndicator(),
@@ -60,11 +84,13 @@ class _VisualizaTicketState extends State<VisualizaTicket> {
             if (kDebugMode) {
               print(snapshot.error);
             }
+            localTicket.value = null;
             return SizedBox(
               width: size.width / 2,
               child: SelectableText('Erro ao buscar!\r\n${snapshot.error}'),
             );
           } else if (snapshot.hasData) {
+            localTicket.value = snapshot.data!;
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -190,24 +216,30 @@ class _VisualizaTicketState extends State<VisualizaTicket> {
                           itemCount: snapshot.data!.mensagem.length,
                           itemBuilder: (context, index) {
                             Mensagem msg = snapshot.data!.mensagem[index];
-                            return ListTile(
-                              title: SelectableText(msg.conteudo),
-                              subtitle: FutureBuilder<String>(
-                                future: agenteController.getUserCod(
-                                    snapshot.data!.responsavelatual ?? '',
-                                    showNaoEncontrado: false),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return SelectableText(
-                                      'Usuario: \r\n'
-                                      '${DateFormat("dd/MM/yyy hh:mm:ss").format(msg.datamensagem)}',
-                                    );
-                                  } else {
-                                    return SelectableText(
-                                        'Usuario: ${snapshot.data}\r\n'
-                                        '${DateFormat("dd/MM/yyy hh:mm:ss").format(msg.datamensagem)}');
-                                  }
-                                },
+                            bool changeColor = index % 2 == 0;
+                            return Container(
+                              color: changeColor
+                                  ? Colors.grey.shade100
+                                  : Colors.grey.shade300,
+                              child: ListTile(
+                                title: SelectableText(msg.conteudo),
+                                subtitle: FutureBuilder<String>(
+                                  future: agenteController.getUserCod(
+                                      snapshot.data!.responsavelatual ?? '',
+                                      showNaoEncontrado: false),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return SelectableText(
+                                        'Usuario: \r\n'
+                                        '${DateFormat("dd/MM/yyy HH:mm:ss").format(msg.datamensagem)}',
+                                      );
+                                    } else {
+                                      return SelectableText(
+                                          'Usuario: ${snapshot.data}\r\n'
+                                          '${DateFormat("dd/MM/yyy HH:mm:ss").format(msg.datamensagem)}');
+                                    }
+                                  },
+                                ),
                               ),
                             );
                           },
@@ -244,24 +276,30 @@ class _VisualizaTicketState extends State<VisualizaTicket> {
                           itemBuilder: (context, index) {
                             Movimentacao mov =
                                 snapshot.data!.movimentacao[index];
-                            return ListTile(
-                              title: FutureBuilder<String>(
-                                future: agenteController
-                                    .getUserCod(mov.usuarioenvio),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return const SelectableText(
-                                      'Usuario:',
-                                    );
-                                  } else {
-                                    return SelectableText(
-                                        'Usuario: ${snapshot.data}');
-                                  }
-                                },
+                            bool changeColor = index % 2 == 0;
+                            return Container(
+                              color: changeColor
+                                  ? Colors.grey.shade100
+                                  : Colors.grey.shade300,
+                              child: ListTile(
+                                title: FutureBuilder<String>(
+                                  future: agenteController
+                                      .getUserCod(mov.usuarioenvio),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return const SelectableText(
+                                        'Usuario:',
+                                      );
+                                    } else {
+                                      return SelectableText(
+                                          'Usuario: ${snapshot.data}');
+                                    }
+                                  },
+                                ),
+                                subtitle: SelectableText(
+                                    DateFormat("dd/MM/yyy HH:mm:ss")
+                                        .format(mov.datamovimento)),
                               ),
-                              subtitle: SelectableText(
-                                  DateFormat("dd/MM/yyy hh:mm:ss")
-                                      .format(mov.datamovimento)),
                             );
                           },
                         ),
@@ -272,6 +310,7 @@ class _VisualizaTicketState extends State<VisualizaTicket> {
               ),
             );
           } else {
+            localTicket.value = null;
             return SizedBox(
               width: size.width / 2,
               child: const SelectableText('Não Localizado'),
