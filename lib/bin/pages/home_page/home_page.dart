@@ -4,7 +4,9 @@ import 'dart:async';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
+import 'package:selecaosicoob/bin/model/sla_model.dart';
 import 'package:selecaosicoob/bin/model/ticket_model.dart';
 import 'package:selecaosicoob/bin/pages/home_page/home_page_controller.dart';
 import 'package:selecaosicoob/bin/pages/setor/setor_list_page.dart';
@@ -12,7 +14,10 @@ import 'package:selecaosicoob/bin/pages/usuario/usuario_list_page.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import '../../../main.dart';
+import '../../model/color_schema_app.dart';
 import '../../model/project_info_model.dart';
+import '../../services/export_data.dart';
 import '../agente/agente_page.dart';
 import 'graficos/cumprir_sla.dart';
 import 'graficos/movimentados.dart';
@@ -140,15 +145,8 @@ class _HomePageState extends State<HomePage>
               animation: ticketController,
               builder: (context, child) {
                 if (ticketController.isLoading) {
-                  return Center(
-                    child: GestureDetector(
-                      onDoubleTap: () {
-                        _myStream = ticketController.streamProcessosAll();
-                        setState(() {});
-                        print('Reseting stream');
-                      },
-                      child: const CircularProgressIndicator(),
-                    ),
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
                 } else if (ticketController.hasError) {
                   return Expanded(
@@ -193,6 +191,112 @@ class _HomePageState extends State<HomePage>
                         height: 10,
                       ),
                       Wrap(
+                          alignment: WrapAlignment.spaceAround,
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: [
+                            SizedBox(
+                              width: 250,
+                              height: 100,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: getIt<CorPadraoTema>().secundaria,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Total de Chamados',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    Text(
+                                      ticketController.dados.length.toString(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              height: 100,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: getIt<CorPadraoTema>().secundaria,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Total de Chamados Atendidos',
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    Text(
+                                      ticketController.dados
+                                          .where((x) => x.responsavel != null)
+                                          .length
+                                          .toString(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              height: 100,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: getIt<CorPadraoTema>().secundaria,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Total de Chamados em Espera',
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    Text(
+                                      ticketController.dados
+                                          .where((x) => x.responsavel == null)
+                                          .length
+                                          .toString(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ]),
+                      Wrap(
                         alignment: WrapAlignment.spaceAround,
                         children: [
                           SizedBox(
@@ -200,6 +304,23 @@ class _HomePageState extends State<HomePage>
                             height: 300,
                             child: GrfQntPorSetor(
                               tickets: ticketController.dados,
+                              tipofiltro: TipoFiltro.todos,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfQntPorSetor(
+                              tickets: ticketController.dados,
+                              tipofiltro: TipoFiltro.somenteFinalizados,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfQntPorSetor(
+                              tickets: ticketController.dados,
+                              tipofiltro: TipoFiltro.somenteAbertos,
                             ),
                           ),
                           SizedBox(
@@ -207,6 +328,23 @@ class _HomePageState extends State<HomePage>
                             height: 300,
                             child: GrfPorUsuario(
                               tickets: ticketController.dados,
+                              tipofiltro: TipoFiltro.todos,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfPorUsuario(
+                              tickets: ticketController.dados,
+                              tipofiltro: TipoFiltro.somenteAbertos,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfPorUsuario(
+                              tickets: ticketController.dados,
+                              tipofiltro: TipoFiltro.somenteFinalizados,
                             ),
                           ),
                           SizedBox(
@@ -221,6 +359,29 @@ class _HomePageState extends State<HomePage>
                             height: 300,
                             child: GrfQntPorDia(
                               tickets: ticketController.dados,
+                              qntDias: 7,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfQntPorDia(
+                              tickets: ticketController.dados,
+                              qntDias: 15,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfSatisfacaoGeral(
+                              tickets: ticketController.dados,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 400,
+                            height: 300,
+                            child: GrfMovimentados(
+                              tickets: ticketController.dados,
                             ),
                           ),
                         ],
@@ -228,24 +389,35 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(
                         height: 10,
                       ),
-                      Wrap(
-                        alignment: WrapAlignment.spaceAround,
-                        children: [
-                          SizedBox(
-                            width: 300,
-                            height: 300,
-                            child: GrfSatisfacaoGeral(
-                              tickets: ticketController.dados,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 300,
-                            height: 300,
-                            child: GrfMovimentados(
-                              tickets: ticketController.dados,
-                            ),
-                          ),
-                        ],
+                      AnimatedBuilder(
+                        animation: ticketController,
+                        builder: (context, child) {
+                          if (ticketController.hasData) {
+                            return Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: OutlinedButton(
+                                onPressed: () => ExportData()
+                                    .downloadExcel(ticketController.dados),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    FaIcon(
+                                      FontAwesomeIcons.fileExcel,
+                                      color: Colors.green,
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 5, horizontal: 10),
+                                      child: Text('Download Excel'),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          } else {
+                            return Container();
+                          }
+                        },
                       ),
                     ],
                   );

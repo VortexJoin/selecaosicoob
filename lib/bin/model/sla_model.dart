@@ -213,6 +213,8 @@ class SlaStatisticsScreenState extends State<SlaStatisticsScreen> {
   }
 }
 
+enum TipoFiltro { somenteFinalizados, somenteAbertos, todos, aguardando }
+
 class QntPorChave {
   int quantidade;
   String chave;

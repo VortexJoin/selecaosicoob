@@ -59,6 +59,7 @@ dependencies:
   universal_html: ^2.0.9
   url_launcher: ^6.1.9
   package_info_plus: ^3.0.3
+  animate_do: ^3.0.2
   #easy_sidemenu: ^0.4.1+1
   #flutter_side_menu: ^0.2.1
 

@@ -11,10 +11,11 @@ import '../../../model/ticket_model.dart';
 
 class GrfQntPorSetor extends StatefulWidget {
   final List<Ticket> tickets;
-
+  final TipoFiltro tipofiltro;
   const GrfQntPorSetor({
     super.key,
     required this.tickets,
+    this.tipofiltro = TipoFiltro.todos,
   });
 
   @override
@@ -25,6 +26,7 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
   double radiusColumn = 3;
   double widthColumn = .6;
   double spacingColumn = .3;
+
   SetorController setorController = SetorController();
   ValueNotifier<List<QntPorChave>> qntPorChave = ValueNotifier([]);
 
@@ -53,6 +55,16 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
     return res;
   }
 
+  int totalTickets() {
+    int total = 0;
+
+    for (var a in qntPorChave.value) {
+      total = total + a.quantidade;
+    }
+
+    return total;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,11 +73,45 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
   }
 
   startData() async {
-    qntPorChave.value = await getChartData(widget.tickets);
+    switch (widget.tipofiltro) {
+      case TipoFiltro.todos:
+        qntPorChave.value = await getChartData(
+            widget.tickets.where((x) => x.responsavelatual != null).toList());
+        break;
+      case TipoFiltro.somenteAbertos:
+        qntPorChave.value = await getChartData(widget.tickets
+            .where((x) =>
+                x.responsavelatual != null &&
+                    x.status.toLowerCase() != 'concluido' ||
+                x.status.toLowerCase() != 'finalizado' ||
+                x.status.toLowerCase() != 'cancelado')
+            .toList());
+        break;
+      case TipoFiltro.somenteFinalizados:
+        qntPorChave.value = await getChartData(widget.tickets
+            .where((x) =>
+                x.responsavelatual != null &&
+                    x.status.toLowerCase() == 'concluido' ||
+                x.status.toLowerCase() == 'finalizado' ||
+                x.status.toLowerCase() == 'cancelado')
+            .toList());
+        break;
+      case TipoFiltro.aguardando:
+        break;
+    }
+  }
 
-    Timer.periodic(const Duration(seconds: 5), (timer) async {
-      qntPorChave.value = await getChartData(widget.tickets);
-    });
+  String titulo() {
+    switch (widget.tipofiltro) {
+      case TipoFiltro.todos:
+        return 'Chamados';
+      case TipoFiltro.somenteAbertos:
+        return 'Chamados em Atendimento';
+      case TipoFiltro.somenteFinalizados:
+        return 'Chamados Finalizados';
+      case TipoFiltro.aguardando:
+        return 'Chamados em Espera';
+    }
   }
 
   @override
@@ -87,7 +133,7 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
             toggleSeriesVisibility: true,
           ),
           palette: getIt<CorPadraoTema>().allColors,
-          title: ChartTitle(text: 'Chamados em Atendimento'),
+          title: ChartTitle(text: titulo()),
           series: <ChartSeries<QntPorChave, String>>[
             BarSeries(
               dataSource: qntPorChave.value,
@@ -107,7 +153,7 @@ class _GrfQntPorSetorState extends State<GrfQntPorSetor> {
             ),
             BarSeries(
               dataSource: [
-                QntPorChave(quantidade: widget.tickets.length, chave: 'Total')
+                QntPorChave(quantidade: totalTickets(), chave: 'Total')
               ],
               xValueMapper: (QntPorChave item, _) => item.chave,
               yValueMapper: (QntPorChave item, _) => item.quantidade,

@@ -204,6 +204,7 @@ class TicketController extends ChangeNotifier {
   TicketController({bool initialLoad = false, showLoading = true}) {
     _showLoading = showLoading;
     if (initialLoad) {
+      _setLoading(true);
       getData();
     }
   }
@@ -220,9 +221,9 @@ class TicketController extends ChangeNotifier {
     notifyListeners();
   }
 
-  _setLoading() {
+  _setLoading(bool isLoading) {
     if (_showLoading) {
-      _isLoading = !_isLoading;
+      _isLoading = isLoading;
       notifyListeners();
     }
   }
@@ -236,7 +237,7 @@ class TicketController extends ChangeNotifier {
   }
 
   Future<void> getData({String filtroDescricao = ''}) async {
-    _setLoading();
+    _setLoading(true);
     try {
       _dados = [];
       if (filtroDescricao.isNotEmpty) {
@@ -268,7 +269,7 @@ class TicketController extends ChangeNotifier {
     }
 
     notifyListeners();
-    _setLoading();
+    _setLoading(false);
   }
 
   CollectionReference getCollection() {
@@ -292,7 +293,7 @@ class TicketController extends ChangeNotifier {
 
   Future<bool> setdata(Ticket ticket, {bool refreshData = false}) async {
     // ESSE METODO SERVE TANTO PARA INSERIR QUANTO PARA EDITAR
-    _setLoading();
+    _setLoading(true);
 
     if (ticket.uid.isEmpty) {
       ticket.uid = _uuid.v4();
@@ -307,7 +308,7 @@ class TicketController extends ChangeNotifier {
         id: ticket.codigo,
       );
       _setError('');
-      _setLoading();
+      _setLoading(false);
 
       if (refreshData) {
         getData();
@@ -315,7 +316,7 @@ class TicketController extends ChangeNotifier {
       return true;
     } catch (e) {
       _setError(e.toString());
-      _setLoading();
+      _setLoading(false);
       return false;
     }
   }
@@ -327,6 +328,7 @@ class TicketController extends ChangeNotifier {
         .orderBy("codigo")
         .orderBy(_orderField)
         .get();
+
     if (docSnapshot.docs.isNotEmpty) {
       return Ticket.fromJson(
           docSnapshot.docs.first.data() as Map<String, dynamic>);
@@ -335,10 +337,12 @@ class TicketController extends ChangeNotifier {
   }
 
   Future<List<Ticket>> getBySetores(List<String> setores) async {
+    _setLoading(true);
     final docSnapshot = await firestoreService
         .getCollection()
         .where("setoratual", arrayContainsAny: setores)
         .get();
+    _setLoading(false);
     return docSnapshot.docs
         .map((e) => Ticket.fromJson(e.data() as Map<String, dynamic>))
         .toList();
@@ -349,6 +353,7 @@ class TicketController extends ChangeNotifier {
         .getCollection()
         .where("responsavelatual", isEqualTo: responsavelatual)
         .get();
+
     if (docSnapshot.docs.isNotEmpty) {
       return Ticket.fromJson(
           docSnapshot.docs.first.data() as Map<String, dynamic>);
