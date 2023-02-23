@@ -31,7 +31,9 @@ class _AgenteViewState extends State<AgenteView> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.usuario.setores.isEmpty) {
+      if (widget.usuario.setores.isEmpty && widget.usuario.tipo == 'agente' ||
+          widget.usuario.tipo == 'tecnico' ||
+          widget.usuario.tipo == 'supervisor') {
         Utils.showOkAlert(
           context,
           msg:

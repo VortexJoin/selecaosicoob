@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
           error: Colors.red,
         ),
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-        blendLevel: 9,
+        //blendLevel: 9,
         subThemesData: const FlexSubThemesData(
           blendOnLevel: 10,
           blendOnColors: false,
@@ -70,7 +70,7 @@ class MyApp extends StatelessWidget {
           error: Colors.red,
         ),
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-        blendLevel: 15,
+        // blendLevel: 15,
         subThemesData: const FlexSubThemesData(
           blendOnLevel: 20,
         ),
