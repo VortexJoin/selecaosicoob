@@ -321,7 +321,7 @@ class TicketController extends ChangeNotifier {
     }
   }
 
-  Future<Ticket?> getByCodigo(String codigo) async {
+  Future<Ticket?> getByCodigo(String codigo, {bool setOnData = false}) async {
     final docSnapshot = await firestoreService
         .getCollection()
         .where("codigo", isEqualTo: codigo)
@@ -329,6 +329,11 @@ class TicketController extends ChangeNotifier {
         .orderBy(_orderField)
         .get();
 
+    if (setOnData) {
+      setdata(
+        Ticket.fromJson(docSnapshot.docs.first.data() as Map<String, dynamic>),
+      );
+    }
     if (docSnapshot.docs.isNotEmpty) {
       return Ticket.fromJson(
           docSnapshot.docs.first.data() as Map<String, dynamic>);

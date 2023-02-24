@@ -19,6 +19,7 @@ import '../../model/color_schema_app.dart';
 import '../../model/project_info_model.dart';
 import '../../services/export_data.dart';
 import '../agente/agente_page.dart';
+import '../agente/pesquisa_chamado_page.dart';
 import 'graficos/cumprir_sla.dart';
 import 'graficos/movimentados.dart';
 import 'graficos/por_assunto.dart';
@@ -74,10 +75,24 @@ class _HomePageState extends State<HomePage> {
         title: Text(GetIt.instance<ProjectInfo>().nome),
         actions: [
           IconButton(
-              onPressed: () => login(),
-              icon: const Icon(
-                Icons.person,
-              ))
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PesquisaChamado(),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.search,
+            ),
+          ),
+          IconButton(
+            onPressed: () => login(),
+            icon: const Icon(
+              Icons.person,
+            ),
+          ),
         ],
       ),
       drawer: Drawer(

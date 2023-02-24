@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:selecaosicoob/bin/model/usuario_model.dart';
 import 'package:selecaosicoob/bin/pages/agente/agente_controller.dart';
+import 'package:selecaosicoob/bin/pages/agente/pesquisa_chamado_page.dart';
 import 'package:selecaosicoob/bin/services/utils_func.dart';
 
 import '../../model/project_info_model.dart';
@@ -73,11 +74,19 @@ class _AgenteViewState extends State<AgenteView> {
                 avatar: const Icon(Icons.search),
                 showCheckmark: false,
                 label: const Text(
-                  'Pesquisa de Tickets',
+                  'Pesquisa de Chamados',
                   overflow: TextOverflow.visible,
                   textAlign: TextAlign.center,
                 ),
-                onSelected: (value) {},
+                onSelected: (value) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          PesquisaChamado(usuario: widget.usuario),
+                    ),
+                  );
+                },
               ),
             ),
             Padding(
