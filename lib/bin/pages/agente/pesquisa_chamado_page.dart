@@ -5,7 +5,6 @@ import 'package:selecaosicoob/bin/model/ticket_model.dart';
 import 'package:selecaosicoob/bin/model/usuario_model.dart';
 
 import '../../model/project_info_model.dart';
-import '../../services/utils_func.dart';
 import 'agente_controller.dart';
 
 class PesquisaChamado extends StatefulWidget {
@@ -22,7 +21,7 @@ class PesquisaChamado extends StatefulWidget {
 class _PesquisaChamadoState extends State<PesquisaChamado> {
   late AgenteController agenteController;
 
-  TicketController ticketController = TicketController();
+  TicketController ticketController = TicketController(initialLoad: true);
 
   @override
   void initState() {
@@ -53,54 +52,25 @@ class _PesquisaChamadoState extends State<PesquisaChamado> {
             child: SizedBox(
               height: 80,
               width: MediaQuery.of(context).size.width,
-              child: Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: vnFiltro,
-                    builder: (context, value, child) {
-                      return SizedBox(
-                        width: 80,
-                        height: 80,
-                        child: PopupMenuButton<String>(
-                          position: PopupMenuPosition.under,
-                          onSelected: (value) {
-                            vnFiltro.value = value;
-                            textEditingController.clear();
-                          },
-                          child: Center(
-                            child: Text(
-                              'Filtro: \r\n${Utils.capitalize(vnFiltro.value)}',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'codigo',
-                              child: Text('Codigo'),
-                            ),
-                            const PopupMenuItem(
-                              value: 'conteudo',
-                              child: Text('Conteudo'),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      controller: textEditingController,
-                      decoration: const InputDecoration(
-                        label: Text('Pesquisar'),
-                      ),
-                      focusNode: focusNode,
-                      maxLines: 1,
-                      onFieldSubmitted: (value) {
-                        ticketController.getByCodigo(value, setOnData: true);
-                      },
-                    ),
-                  ),
-                ],
+              child: TextFormField(
+                controller: textEditingController,
+                decoration: const InputDecoration(
+                  label: Text('Pesquisar'),
+                ),
+                focusNode: focusNode,
+                maxLines: 1,
+                onChanged: (x) {
+                  if (x.isEmpty) {
+                    ticketController.getData();
+                  }
+                },
+                onEditingComplete: () {
+                  ticketController.getData().then((x) {
+                    ticketController.filterGeral(
+                      textEditingController.text,
+                    );
+                  });
+                },
               ),
             ),
           ),
@@ -108,16 +78,23 @@ class _PesquisaChamadoState extends State<PesquisaChamado> {
             animation: ticketController,
             builder: (context, child) {
               if (ticketController.isLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(),
+                return const Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 );
               } else if (!ticketController.hasData) {
-                return const Center(
-                  child: Text('Não Localizado'),
+                return const Expanded(
+                  child: Center(
+                    child: Text('Não Localizado'),
+                  ),
                 );
               } else if (ticketController.hasError) {
-                return Center(
-                  child: Text('Erro na Solicitação ${ticketController.error}'),
+                return Expanded(
+                  child: Center(
+                    child:
+                        Text('Erro na Solicitação ${ticketController.error}'),
+                  ),
                 );
               } else if (ticketController.hasData) {
                 return Expanded(
@@ -148,8 +125,29 @@ class _PesquisaChamadoState extends State<PesquisaChamado> {
                   ),
                 );
               } else {
-                return Container();
+                return Expanded(child: Container());
               }
+            },
+          ),
+          AnimatedBuilder(
+            animation: ticketController,
+            builder: (context, child) {
+              return Container(
+                height: 60,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                    border: Border(
+                  top: BorderSide(
+                    color: Colors.grey.withOpacity(.5),
+                    width: 1,
+                  ),
+                )),
+                child: Row(
+                  children: [
+                    Text('Encontrados : ${ticketController.dados.length}')
+                  ],
+                ),
+              );
             },
           ),
         ],

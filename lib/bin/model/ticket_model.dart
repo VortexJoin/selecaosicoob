@@ -108,6 +108,10 @@ class Ticket {
         "movimentacao": List<dynamic>.from(movimentacao.map((x) => x.toJson())),
         "avaliacao": (avaliacao == null) ? '' : avaliacao!.toJson(),
       };
+
+  String toStringCAC() {
+    return '$codigo $assunto $conteudo';
+  }
 }
 
 class Avaliacao {
@@ -321,23 +325,41 @@ class TicketController extends ChangeNotifier {
     }
   }
 
-  Future<Ticket?> getByCodigo(String codigo, {bool setOnData = false}) async {
-    final docSnapshot = await firestoreService
-        .getCollection()
-        .where("codigo", isEqualTo: codigo)
-        .orderBy("codigo")
-        .orderBy(_orderField)
-        .get();
+  filterGeral(String filter) {
+    _dados = dados
+        .where(
+          (x) => x.toStringCAC().toLowerCase().contains(
+                filter.toLowerCase(),
+              ),
+        )
+        .toList();
+  }
 
-    if (setOnData) {
-      setdata(
-        Ticket.fromJson(docSnapshot.docs.first.data() as Map<String, dynamic>),
-      );
+  Future<Ticket?> getByCodigo(String codigo, {bool setOnData = false}) async {
+    try {
+      final docSnapshot = await firestoreService
+          .getCollection()
+          .where("codigo", isEqualTo: codigo)
+          .orderBy("codigo")
+          .orderBy(_orderField)
+          .get();
+
+      if (setOnData) {
+        setdata(
+          Ticket.fromJson(
+              docSnapshot.docs.first.data() as Map<String, dynamic>),
+        );
+      }
+      if (docSnapshot.docs.isNotEmpty) {
+        return Ticket.fromJson(
+            docSnapshot.docs.first.data() as Map<String, dynamic>);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
     }
-    if (docSnapshot.docs.isNotEmpty) {
-      return Ticket.fromJson(
-          docSnapshot.docs.first.data() as Map<String, dynamic>);
-    }
+
     return null;
   }
 
